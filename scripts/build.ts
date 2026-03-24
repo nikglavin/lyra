@@ -3,23 +3,37 @@
 // Usage: bun scripts/build.ts
 // Run from the repo root.
 
-import { readFileSync, readdirSync, statSync, existsSync, mkdirSync, copyFileSync, chmodSync } from 'fs';
-import { join } from 'path';
-import { execSync } from 'child_process';
+import {
+  readFileSync,
+  readdirSync,
+  statSync,
+  existsSync,
+  mkdirSync,
+  copyFileSync,
+  chmodSync,
+} from "fs";
+import { join } from "path";
+import { execSync } from "child_process";
 
-const REPO_ROOT = execSync(`git -C ${JSON.stringify(import.meta.dir)} rev-parse --show-toplevel`).toString().trim();
-const SKILLS_DIR = join(REPO_ROOT, 'skills');
-const DIST_DIR = join(REPO_ROOT, '.agents', 'skills');
+const REPO_ROOT = execSync(
+  `git -C ${JSON.stringify(import.meta.dir)} rev-parse --show-toplevel`,
+)
+  .toString()
+  .trim();
+const SKILLS_DIR = join(REPO_ROOT, "skills");
+const DIST_DIR = join(REPO_ROOT, ".agents", "skills");
 
 // Resolve all {{shared/filename.md}} includes in content
 function resolveIncludes(content: string, tmplPath: string): string {
   return content.replace(/\{\{(shared\/[^}]+)\}\}/g, (_match, ref: string) => {
     const partialPath = join(REPO_ROOT, ref);
     if (!existsSync(partialPath)) {
-      console.error(`ERROR: Missing shared partial '${ref}' referenced in ${tmplPath}`);
+      console.error(
+        `ERROR: Missing shared partial '${ref}' referenced in ${tmplPath}`,
+      );
       process.exit(1);
     }
-    return readFileSync(partialPath, 'utf8');
+    return readFileSync(partialPath, "utf8");
   });
 }
 
@@ -48,11 +62,11 @@ function mirrorDir(src: string, dest: string): boolean {
 
 // Get all skill directories
 const skillDirs = readdirSync(SKILLS_DIR)
-  .map(name => ({ name, fullPath: join(SKILLS_DIR, name) }))
+  .map((name) => ({ name, fullPath: join(SKILLS_DIR, name) }))
   .filter(({ fullPath }) => statSync(fullPath).isDirectory());
 
 if (skillDirs.length === 0) {
-  console.log('No skill directories found under skills/');
+  console.log("No skill directories found under skills/");
   process.exit(0);
 }
 
@@ -60,8 +74,8 @@ const compiled: string[] = [];
 const unchanged: string[] = [];
 
 for (const { name: skillName, fullPath: skillDir } of skillDirs) {
-  const tmplPath = join(skillDir, 'SKILL.md.tmpl');
-  const srcPath = join(skillDir, 'SKILL.md');
+  const tmplPath = join(skillDir, "SKILL.md.tmpl");
+  const srcPath = join(skillDir, "SKILL.md");
 
   // .tmpl takes precedence over plain SKILL.md
   let content: string;
@@ -74,7 +88,7 @@ for (const { name: skillName, fullPath: skillDir } of skillDirs) {
   }
 
   const outDir = join(DIST_DIR, skillName);
-  const outPath = join(outDir, 'SKILL.md');
+  const outPath = join(outDir, "SKILL.md");
   mkdirSync(outDir, { recursive: true });
 
   let skillChanged = false;
@@ -86,7 +100,7 @@ for (const { name: skillName, fullPath: skillDir } of skillDirs) {
   }
 
   // Mirror supporting subdirectories
-  for (const subdir of ['scripts', 'references', 'assets', 'resources']) {
+  for (const subdir of ["scripts", "references", "assets", "resources"]) {
     const srcSubdir = join(skillDir, subdir);
     if (!existsSync(srcSubdir)) continue;
     if (mirrorDir(srcSubdir, join(outDir, subdir))) skillChanged = true;
@@ -99,6 +113,9 @@ for (const { name: skillName, fullPath: skillDir } of skillDirs) {
   }
 }
 
-if (compiled.length > 0) console.log(`Compiled (${compiled.length}): ${compiled.join(', ')}`);
-if (unchanged.length > 0) console.log(`Unchanged (${unchanged.length}): ${unchanged.join(', ')}`);
-if (compiled.length === 0 && unchanged.length === 0) console.log('Nothing to compile.');
+if (compiled.length > 0)
+  console.log(`Compiled (${compiled.length}): ${compiled.join(", ")}`);
+if (unchanged.length > 0)
+  console.log(`Unchanged (${unchanged.length}): ${unchanged.join(", ")}`);
+if (compiled.length === 0 && unchanged.length === 0)
+  console.log("Nothing to compile.");

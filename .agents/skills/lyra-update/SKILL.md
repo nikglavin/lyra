@@ -12,7 +12,7 @@ Pull the latest Lyra skills from git, recompile, and re-install.
 ### Find the repo root
 
 ```bash
-REPO_ROOT=$(git -C "$(dirname "$(realpath ~/.claude/skills/lyra-update)")" rev-parse --show-toplevel)
+REPO_ROOT=$(git -C ~/.claude/skills/lyra-update rev-parse --show-toplevel)
 ```
 
 ### Step 1: Check what's available

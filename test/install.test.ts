@@ -46,11 +46,17 @@ test("install skips real skill directories and does not overwrite them", () => {
   const fakeHome = mkdtempSync(join(tmpdir(), "lyra-test-"));
   try {
     // Create a real directory where lyra-breadboard would be linked
-    mkdirSync(join(fakeHome, ".claude/skills/lyra-breadboard"), { recursive: true });
+    mkdirSync(join(fakeHome, ".claude/skills/lyra-breadboard"), {
+      recursive: true,
+    });
     const output = runInstall(fakeHome);
     expect(output).toContain("SKIP lyra-breadboard");
     // Confirm it's still a real directory, not replaced by a symlink
-    expect(lstatSync(join(fakeHome, ".claude/skills/lyra-breadboard")).isSymbolicLink()).toBe(false);
+    expect(
+      lstatSync(
+        join(fakeHome, ".claude/skills/lyra-breadboard"),
+      ).isSymbolicLink(),
+    ).toBe(false);
   } finally {
     rmSync(fakeHome, { recursive: true });
   }
@@ -63,7 +69,9 @@ test("install skips real shared/scripts directory and does not overwrite it", ()
     const output = runInstall(fakeHome);
     expect(output).toContain("SKIP shared/scripts");
     expect(output).toContain(join(fakeHome, ".claude/shared/scripts"));
-    expect(lstatSync(join(fakeHome, ".claude/shared/scripts")).isSymbolicLink()).toBe(false);
+    expect(
+      lstatSync(join(fakeHome, ".claude/shared/scripts")).isSymbolicLink(),
+    ).toBe(false);
   } finally {
     rmSync(fakeHome, { recursive: true });
   }
