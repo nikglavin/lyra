@@ -9,12 +9,13 @@ import {
 } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Repo root is three levels up: scripts/ -> lyra-build/ -> skills/ -> repo root
-const REPO_ROOT = join(__dirname, '..', '..', '..');
+// Use git to find the repo root — works whether run from source or dist location.
+const REPO_ROOT = execSync(`git -C ${JSON.stringify(__dirname)} rev-parse --show-toplevel`).toString().trim();
 const SKILLS_DIR = join(REPO_ROOT, 'skills');
 const DIST_DIR = join(REPO_ROOT, 'dist', 'skills');
 
