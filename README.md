@@ -24,7 +24,8 @@ git clone https://github.com/nikglavin/lyra.git ~/dev/lyra
 ~/dev/lyra/install
 ```
 
-Skills in `~/.claude/skills/` are symlinked to `.agents/skills/`, so edits to `skills/` are live after a rebuild — no re-install needed:
+Skills in `~/.claude/skills/` are symlinked to `.agents/skills/`, so edits to `skills/` are live after a rebuild — no
+re-install needed:
 
 ```bash
 bun run build

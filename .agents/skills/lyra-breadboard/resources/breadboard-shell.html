@@ -1,188 +1,397 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Breadboard</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, -apple-system, sans-serif; background: #f9fafb; color: #111827; padding: 32px 20px 60px; }
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Breadboard</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				font-family:
+					system-ui,
+					-apple-system,
+					sans-serif;
+				background: #f9fafb;
+				color: #111827;
+				padding: 32px 20px 60px;
+			}
 
-  /* ── Page header ── */
-  .page-header { max-width: 1200px; margin: 0 auto 32px; }
-  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
-  .page-meta { font-size: 13px; color: #9ca3af; margin-top: 4px; }
-  .page-meta span { margin-right: 16px; }
+			/* ── Page header ── */
+			.page-header {
+				max-width: 1200px;
+				margin: 0 auto 32px;
+			}
+			.page-title {
+				font-size: 22px;
+				font-weight: 700;
+				letter-spacing: -0.3px;
+			}
+			.page-meta {
+				font-size: 13px;
+				color: #9ca3af;
+				margin-top: 4px;
+			}
+			.page-meta span {
+				margin-right: 16px;
+			}
 
-  /* ── Group divider ── */
-  .group-header { max-width: 1200px; margin: 36px auto 14px; display: flex; align-items: center; gap: 12px; }
-  .group-name { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #374151; white-space: nowrap; }
-  .group-line { flex: 1; height: 1px; background: #e5e7eb; }
+			/* ── Group divider ── */
+			.group-header {
+				max-width: 1200px;
+				margin: 36px auto 14px;
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+			.group-name {
+				font-size: 9px;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 1px;
+				color: #374151;
+				white-space: nowrap;
+			}
+			.group-line {
+				flex: 1;
+				height: 1px;
+				background: #e5e7eb;
+			}
 
-  /* ── Grid ── */
-  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto; align-items: start; }
-  @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 500px) { .grid { grid-template-columns: 1fr; } }
+			/* ── Grid ── */
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 20px;
+				max-width: 1200px;
+				margin: 0 auto;
+				align-items: start;
+			}
+			@media (max-width: 900px) {
+				.grid {
+					grid-template-columns: repeat(2, 1fr);
+				}
+			}
+			@media (max-width: 500px) {
+				.grid {
+					grid-template-columns: 1fr;
+				}
+			}
 
-  /* ── Card ── */
-  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
-  .card-header { padding: 12px 14px 10px; border-bottom: 1px solid #f3f4f6; border-left: 3px solid var(--accent); cursor: pointer; user-select: none; position: relative; padding-right: 32px; }
-  .card-header:hover { background: #fafafa; }
-  .card-num { font-size: 10px; font-family: ui-monospace, monospace; color: #9ca3af; }
-  .card-name { font-size: 15px; font-weight: 700; color: #111827; margin-top: 2px; }
-  .card-group { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-top: 4px; }
-  .card-jtbd { font-size: 11px; color: #6b7280; margin-top: 5px; line-height: 1.4; }
-  .card-body { padding: 12px 14px; display: none; flex-direction: column; gap: 6px; }
-  .card--expanded .card-body { display: flex; }
-  .card--expanded .card-header { border-bottom: 1px solid #f3f4f6; }
-  .card-expand { margin-top: 8px; font-size: 10px; color: #9ca3af; display: flex; align-items: center; gap: 5px; line-height: 1.5; }
-  .card-expand::before { content: '▶'; color: #d1d5db; display: inline-block; transition: transform 0.15s; }
-  .card--expanded .card-expand::before { transform: rotate(90deg); }
-  .card-footer { padding: 8px 14px 12px; border-top: 1px solid #f3f4f6; display: flex; flex-wrap: wrap; gap: 6px; }
+			/* ── Card ── */
+			.card {
+				background: #fff;
+				border: 1px solid #e5e7eb;
+				border-radius: 8px;
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+				overflow: hidden;
+			}
+			.card-header {
+				padding: 12px 14px 10px;
+				border-bottom: 1px solid #f3f4f6;
+				border-left: 3px solid var(--accent);
+				cursor: pointer;
+				user-select: none;
+				position: relative;
+				padding-right: 32px;
+			}
+			.card-header:hover {
+				background: #fafafa;
+			}
+			.card-num {
+				font-size: 10px;
+				font-family: ui-monospace, monospace;
+				color: #9ca3af;
+			}
+			.card-name {
+				font-size: 15px;
+				font-weight: 700;
+				color: #111827;
+				margin-top: 2px;
+			}
+			.card-group {
+				font-size: 9px;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+				color: var(--accent);
+				margin-top: 4px;
+			}
+			.card-jtbd {
+				font-size: 11px;
+				color: #6b7280;
+				margin-top: 5px;
+				line-height: 1.4;
+			}
+			.card-body {
+				padding: 12px 14px;
+				display: none;
+				flex-direction: column;
+				gap: 6px;
+			}
+			.card--expanded .card-body {
+				display: flex;
+			}
+			.card--expanded .card-header {
+				border-bottom: 1px solid #f3f4f6;
+			}
+			.card-expand {
+				margin-top: 8px;
+				font-size: 10px;
+				color: #9ca3af;
+				display: flex;
+				align-items: center;
+				gap: 5px;
+				line-height: 1.5;
+			}
+			.card-expand::before {
+				content: "▶";
+				color: #d1d5db;
+				display: inline-block;
+				transition: transform 0.15s;
+			}
+			.card--expanded .card-expand::before {
+				transform: rotate(90deg);
+			}
+			.card-footer {
+				padding: 8px 14px 12px;
+				border-top: 1px solid #f3f4f6;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 6px;
+			}
 
-  /* ── Element block ── */
-  .el { background: #fff; border: 1px solid #e5e7eb; border-radius: 5px; overflow: hidden; font-size: 12px; line-height: 1.5; }
-  .el-main { padding: 7px 10px; }
-  .el-type { font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-  .el-content { color: #111827; }
-  .el-note { font-size: 11px; color: #9ca3af; line-height: 1.4; padding: 5px 10px; border-top: 1px solid #f3f4f6; }
-  /* ── Form fields ── */
-  .el-field { display: flex; align-items: baseline; gap: 8px; padding: 5px 10px; background: #f9fafb; border-top: 1px solid #e5e7eb; }
-  .el-field-type { font-size: 9px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; width: 68px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .el-field-label { font-size: 11px; color: #374151; line-height: 1.4; flex: 1; min-width: 0; }
-  /* ── Variants (or:empty / or:filled / or:selected) ── */
-  .el-variant { display: flex; align-items: baseline; gap: 8px; padding: 5px 10px; border-top: 1px dashed #e5e7eb; }
-  .el-variant-key { font-size: 9px; font-weight: 700; color: #d1d5db; text-transform: uppercase; letter-spacing: 0.5px; width: 68px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .el-variant-val { font-size: 11px; color: #9ca3af; line-height: 1.4; font-style: italic; flex: 1; min-width: 0; }
+			/* ── Element block ── */
+			.el {
+				background: #fff;
+				border: 1px solid #e5e7eb;
+				border-radius: 5px;
+				overflow: hidden;
+				font-size: 12px;
+				line-height: 1.5;
+			}
+			.el-main {
+				padding: 7px 10px;
+			}
+			.el-type {
+				font-size: 10px;
+				font-weight: 700;
+				color: #9ca3af;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+				margin-bottom: 2px;
+			}
+			.el-content {
+				color: #111827;
+			}
+			.el-note {
+				font-size: 11px;
+				color: #9ca3af;
+				line-height: 1.4;
+				padding: 5px 10px;
+				border-top: 1px solid #f3f4f6;
+			}
+			/* ── Form fields ── */
+			.el-field {
+				display: flex;
+				align-items: baseline;
+				gap: 8px;
+				padding: 5px 10px;
+				background: #f9fafb;
+				border-top: 1px solid #e5e7eb;
+			}
+			.el-field-type {
+				font-size: 9px;
+				font-weight: 700;
+				color: #9ca3af;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+				width: 68px;
+				flex-shrink: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.el-field-label {
+				font-size: 11px;
+				color: #374151;
+				line-height: 1.4;
+				flex: 1;
+				min-width: 0;
+			}
+			/* ── Variants (or:empty / or:filled / or:selected) ── */
+			.el-variant {
+				display: flex;
+				align-items: baseline;
+				gap: 8px;
+				padding: 5px 10px;
+				border-top: 1px dashed #e5e7eb;
+			}
+			.el-variant-key {
+				font-size: 9px;
+				font-weight: 700;
+				color: #d1d5db;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+				width: 68px;
+				flex-shrink: 0;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.el-variant-val {
+				font-size: 11px;
+				color: #9ca3af;
+				line-height: 1.4;
+				font-style: italic;
+				flex: 1;
+				min-width: 0;
+			}
 
-  /* ── Flow pill ── */
-  .pill { font-size: 11px; color: #6b7280; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 100px; padding: 3px 10px; white-space: nowrap; }
-  .pill::before { content: '→ '; color: #9ca3af; }
-</style>
-</head>
-<body>
+			/* ── Flow pill ── */
+			.pill {
+				font-size: 11px;
+				color: #6b7280;
+				background: #f9fafb;
+				border: 1px solid #e5e7eb;
+				border-radius: 100px;
+				padding: 3px 10px;
+				white-space: nowrap;
+			}
+			.pill::before {
+				content: "→ ";
+				color: #9ca3af;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="root"></div>
 
-<div id="root"></div>
-
-<!-- ═══════════════════════════════════════════════════════
+		<!-- ═══════════════════════════════════════════════════════
      DATA — Claude only ever edits this block
 ════════════════════════════════════════════════════════ -->
-<script type="application/json" id="bb-data">
-{}
-</script>
+		<script type="application/json" id="bb-data">
+			{}
+		</script>
 
-<!-- ═══════════════════════════════════════════════════════
+		<!-- ═══════════════════════════════════════════════════════
      RENDERER — never edit below this line
 ════════════════════════════════════════════════════════ -->
-<script>
-function el(tag, attrs, ...children) {
-  const node = document.createElement(tag);
-  if (attrs) Object.entries(attrs).forEach(([k, v]) => {
-    if (k === 'class') node.className = v;
-    else if (k === 'style') node.style.cssText = v;
-    else node.setAttribute(k, v);
-  });
-  children.flat().forEach(c => {
-    if (c == null) return;
-    node.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
-  });
-  return node;
-}
+		<script>
+			function el(tag, attrs, ...children) {
+				const node = document.createElement(tag);
+				if (attrs)
+					Object.entries(attrs).forEach(([k, v]) => {
+						if (k === "class") node.className = v;
+						else if (k === "style") node.style.cssText = v;
+						else node.setAttribute(k, v);
+					});
+				children.flat().forEach((c) => {
+					if (c == null) return;
+					node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+				});
+				return node;
+			}
 
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1,3), 16);
-  const g = parseInt(hex.slice(3,5), 16);
-  const b = parseInt(hex.slice(5,7), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
-}
+			function hexToRgba(hex, alpha) {
+				const r = parseInt(hex.slice(1, 3), 16);
+				const g = parseInt(hex.slice(3, 5), 16);
+				const b = parseInt(hex.slice(5, 7), 16);
+				return `rgba(${r},${g},${b},${alpha})`;
+			}
 
-function renderElement(e, accent) {
-  const block = el('div', { class: 'el' });
-  if (e.type === 'Note' && accent) {
-    block.style.background  = hexToRgba(accent, 0.07);
-    block.style.borderColor = hexToRgba(accent, 0.25);
-  }
-  const main = el('div', { class: 'el-main' });
-  main.appendChild(el('div', { class: 'el-type' }, e.type));
-  if (e.content) main.appendChild(el('div', { class: 'el-content' }, e.content));
-  block.appendChild(main);
-  if (e.fields) {
-    e.fields.forEach(f => {
-      const row = el('div', { class: 'el-field' });
-      row.appendChild(el('span', { class: 'el-field-type' }, f.type));
-      row.appendChild(el('span', { class: 'el-field-label' }, f.content));
-      block.appendChild(row);
-    });
-  }
-  Object.entries(e).filter(([k]) => k.startsWith('or:')).forEach(([k, v]) => {
-    const row = el('div', { class: 'el-variant' });
-    row.appendChild(el('span', { class: 'el-variant-key' }, k));
-    row.appendChild(el('span', { class: 'el-variant-val' }, v));
-    block.appendChild(row);
-  });
-  if (e.note) block.appendChild(el('div', { class: 'el-note' }, e.note));
-  return block;
-}
+			function renderElement(e, accent) {
+				const block = el("div", { class: "el" });
+				if (e.type === "Note" && accent) {
+					block.style.background = hexToRgba(accent, 0.07);
+					block.style.borderColor = hexToRgba(accent, 0.25);
+				}
+				const main = el("div", { class: "el-main" });
+				main.appendChild(el("div", { class: "el-type" }, e.type));
+				if (e.content) main.appendChild(el("div", { class: "el-content" }, e.content));
+				block.appendChild(main);
+				if (e.fields) {
+					e.fields.forEach((f) => {
+						const row = el("div", { class: "el-field" });
+						row.appendChild(el("span", { class: "el-field-type" }, f.type));
+						row.appendChild(el("span", { class: "el-field-label" }, f.content));
+						block.appendChild(row);
+					});
+				}
+				Object.entries(e)
+					.filter(([k]) => k.startsWith("or:"))
+					.forEach(([k, v]) => {
+						const row = el("div", { class: "el-variant" });
+						row.appendChild(el("span", { class: "el-variant-key" }, k));
+						row.appendChild(el("span", { class: "el-variant-val" }, v));
+						block.appendChild(row);
+					});
+				if (e.note) block.appendChild(el("div", { class: "el-note" }, e.note));
+				return block;
+			}
 
-function renderScreen(screen, accent, groupName) {
-  const card = el('div', { class: 'card', style: `--accent: ${accent}` });
+			function renderScreen(screen, accent, groupName) {
+				const card = el("div", { class: "card", style: `--accent: ${accent}` });
 
-  const header = el('div', { class: 'card-header' });
-  header.appendChild(el('div', { class: 'card-num' }, screen.num));
-  header.appendChild(el('div', { class: 'card-name' }, screen.name));
-  if (screen.group || groupName) {
-    header.appendChild(el('div', { class: 'card-group' }, screen.group || groupName));
-  }
-  if (screen.jtbd) header.appendChild(el('div', { class: 'card-jtbd' }, screen.jtbd));
-  const count = (screen.elements || []).length;
-  header.appendChild(el('div', { class: 'card-expand' }, `${count} element${count !== 1 ? 's' : ''}`));
-  header.addEventListener('click', () => card.classList.toggle('card--expanded'));
-  card.appendChild(header);
+				const header = el("div", { class: "card-header" });
+				header.appendChild(el("div", { class: "card-num" }, screen.num));
+				header.appendChild(el("div", { class: "card-name" }, screen.name));
+				if (screen.group || groupName) {
+					header.appendChild(el("div", { class: "card-group" }, screen.group || groupName));
+				}
+				if (screen.jtbd) header.appendChild(el("div", { class: "card-jtbd" }, screen.jtbd));
+				const count = (screen.elements || []).length;
+				header.appendChild(el("div", { class: "card-expand" }, `${count} element${count !== 1 ? "s" : ""}`));
+				header.addEventListener("click", () => card.classList.toggle("card--expanded"));
+				card.appendChild(header);
 
-  const body = el('div', { class: 'card-body' });
-  (screen.elements || []).forEach(e => body.appendChild(renderElement(e, accent)));
-  card.appendChild(body);
+				const body = el("div", { class: "card-body" });
+				(screen.elements || []).forEach((e) => body.appendChild(renderElement(e, accent)));
+				card.appendChild(body);
 
-  if (screen.flows && screen.flows.length) {
-    const footer = el('div', { class: 'card-footer' });
-    screen.flows.forEach(f => footer.appendChild(el('span', { class: 'pill' }, f)));
-    card.appendChild(footer);
-  }
+				if (screen.flows && screen.flows.length) {
+					const footer = el("div", { class: "card-footer" });
+					screen.flows.forEach((f) => footer.appendChild(el("span", { class: "pill" }, f)));
+					card.appendChild(footer);
+				}
 
-  return card;
-}
+				return card;
+			}
 
-function renderGroup(group) {
-  const frag = document.createDocumentFragment();
+			function renderGroup(group) {
+				const frag = document.createDocumentFragment();
 
-  const divider = el('div', { class: 'group-header' });
-  divider.appendChild(el('span', { class: 'group-name' }, group.name));
-  divider.appendChild(el('div', { class: 'group-line' }));
-  frag.appendChild(divider);
+				const divider = el("div", { class: "group-header" });
+				divider.appendChild(el("span", { class: "group-name" }, group.name));
+				divider.appendChild(el("div", { class: "group-line" }));
+				frag.appendChild(divider);
 
-  const grid = el('div', { class: 'grid' });
-  (group.screens || []).forEach(s => grid.appendChild(renderScreen(s, group.accent, '')));
-  frag.appendChild(grid);
+				const grid = el("div", { class: "grid" });
+				(group.screens || []).forEach((s) => grid.appendChild(renderScreen(s, group.accent, "")));
+				frag.appendChild(grid);
 
-  return frag;
-}
+				return frag;
+			}
 
-function render(data) {
-  const root = document.getElementById('root');
+			function render(data) {
+				const root = document.getElementById("root");
 
-  const header = el('div', { class: 'page-header' });
-  header.appendChild(el('div', { class: 'page-title' }, data.product));
-  const meta = el('div', { class: 'page-meta' });
-  const total = (data.groups || []).reduce((n, g) => n + (g.screens || []).length, 0);
-  meta.appendChild(el('span', {}, `${total} screens`));
-  if (data.date) meta.appendChild(el('span', {}, `Generated ${data.date}`));
-  header.appendChild(meta);
-  root.appendChild(header);
+				const header = el("div", { class: "page-header" });
+				header.appendChild(el("div", { class: "page-title" }, data.product));
+				const meta = el("div", { class: "page-meta" });
+				const total = (data.groups || []).reduce((n, g) => n + (g.screens || []).length, 0);
+				meta.appendChild(el("span", {}, `${total} screens`));
+				if (data.date) meta.appendChild(el("span", {}, `Generated ${data.date}`));
+				header.appendChild(meta);
+				root.appendChild(header);
 
-  (data.groups || []).forEach(g => root.appendChild(renderGroup(g)));
-}
+				(data.groups || []).forEach((g) => root.appendChild(renderGroup(g)));
+			}
 
-render(JSON.parse(document.getElementById('bb-data').textContent));
-</script>
-</body>
+			render(JSON.parse(document.getElementById("bb-data").textContent));
+		</script>
+	</body>
 </html>
