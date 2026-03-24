@@ -1,27 +1,19 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Lyra skill library compiler
-// Usage: node skills/lyra-build/scripts/build.mjs
-// Run from the repo root or via the lyra-build skill.
+// Usage: bun scripts/build.ts
+// Run from the repo root.
 
-import {
-  readFileSync, writeFileSync, mkdirSync, readdirSync,
-  statSync, existsSync, copyFileSync, chmodSync,
-} from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync, readdirSync, statSync, existsSync, mkdirSync, copyFileSync, chmodSync } from 'fs';
+import { join } from 'path';
 import { execSync } from 'child_process';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Use git to find the repo root — works whether run from source or dist location.
-const REPO_ROOT = execSync(`git -C ${JSON.stringify(__dirname)} rev-parse --show-toplevel`).toString().trim();
+const REPO_ROOT = execSync(`git -C ${JSON.stringify(import.meta.dir)} rev-parse --show-toplevel`).toString().trim();
 const SKILLS_DIR = join(REPO_ROOT, 'skills');
-const DIST_DIR = join(REPO_ROOT, 'dist', 'skills');
+const DIST_DIR = join(REPO_ROOT, '.agents', 'skills');
 
 // Resolve all {{shared/filename.md}} includes in content
-function resolveIncludes(content, tmplPath) {
-  return content.replace(/\{\{(shared\/[^}]+)\}\}/g, (_match, ref) => {
+function resolveIncludes(content: string, tmplPath: string): string {
+  return content.replace(/\{\{(shared\/[^}]+)\}\}/g, (_match, ref: string) => {
     const partialPath = join(REPO_ROOT, ref);
     if (!existsSync(partialPath)) {
       console.error(`ERROR: Missing shared partial '${ref}' referenced in ${tmplPath}`);
@@ -33,7 +25,7 @@ function resolveIncludes(content, tmplPath) {
 
 // Mirror a directory recursively, copying only files that differ.
 // Preserves file permissions. Returns true if anything changed.
-function mirrorDir(src, dest) {
+function mirrorDir(src: string, dest: string): boolean {
   mkdirSync(dest, { recursive: true });
   let changed = false;
   for (const entry of readdirSync(src)) {
@@ -64,19 +56,19 @@ if (skillDirs.length === 0) {
   process.exit(0);
 }
 
-const compiled = [];
-const unchanged = [];
+const compiled: string[] = [];
+const unchanged: string[] = [];
 
 for (const { name: skillName, fullPath: skillDir } of skillDirs) {
   const tmplPath = join(skillDir, 'SKILL.md.tmpl');
   const srcPath = join(skillDir, 'SKILL.md');
 
   // .tmpl takes precedence over plain SKILL.md
-  let content;
+  let content: string;
   if (existsSync(tmplPath)) {
-    content = resolveIncludes(readFileSync(tmplPath, 'utf8'), tmplPath);
+    content = resolveIncludes(await Bun.file(tmplPath).text(), tmplPath);
   } else if (existsSync(srcPath)) {
-    content = readFileSync(srcPath, 'utf8');
+    content = await Bun.file(srcPath).text();
   } else {
     continue; // Not a skill directory
   }
@@ -87,8 +79,9 @@ for (const { name: skillName, fullPath: skillDir } of skillDirs) {
 
   let skillChanged = false;
 
-  if (!existsSync(outPath) || readFileSync(outPath, 'utf8') !== content) {
-    writeFileSync(outPath, content, 'utf8');
+  const existing = existsSync(outPath) ? await Bun.file(outPath).text() : null;
+  if (existing !== content) {
+    await Bun.write(outPath, content);
     skillChanged = true;
   }
 
@@ -106,12 +99,6 @@ for (const { name: skillName, fullPath: skillDir } of skillDirs) {
   }
 }
 
-if (compiled.length > 0) {
-  console.log(`Compiled (${compiled.length}): ${compiled.join(', ')}`);
-}
-if (unchanged.length > 0) {
-  console.log(`Unchanged (${unchanged.length}): ${unchanged.join(', ')}`);
-}
-if (compiled.length === 0 && unchanged.length === 0) {
-  console.log('Nothing to compile.');
-}
+if (compiled.length > 0) console.log(`Compiled (${compiled.length}): ${compiled.join(', ')}`);
+if (unchanged.length > 0) console.log(`Unchanged (${unchanged.length}): ${unchanged.join(', ')}`);
+if (compiled.length === 0 && unchanged.length === 0) console.log('Nothing to compile.');

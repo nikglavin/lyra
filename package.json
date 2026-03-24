@@ -1,0 +1,14 @@
+{
+  "name": "lyra",
+  "version": "0.1.0",
+  "description": "A skill library for Claude Code",
+  "type": "module",
+  "scripts": {
+    "build": "bun scripts/build.ts",
+    "link": "./install",
+    "deploy": "./scripts/deploy"
+  },
+  "engines": {
+    "bun": ">=1"
+  }
+}
