@@ -15,7 +15,7 @@ const DIST_DIR = join(REPO_ROOT, ".agents", "skills");
 
 // Resolve all {{path/to/file.md}} includes in content
 function resolveIncludes(content: string, tmplPath: string): string {
-	return content.replace(/\{\{([^}]+)\}\}/g, (_match, ref: string) => {
+	return content.replace(/\{\{([^}]*\/[^}]+)\}\}/g, (_match, ref: string) => {
 		const partialPath = join(REPO_ROOT, ref);
 		if (!existsSync(partialPath)) {
 			console.error(`ERROR: Missing shared partial '${ref}' referenced in ${tmplPath}`);

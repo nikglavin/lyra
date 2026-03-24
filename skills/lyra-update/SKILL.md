@@ -1,15 +1,15 @@
 ---
 name: lyra-update
 description:
-  Update the Lyra skill library — pulls latest from git, recompiles, and re-symlinks any new skills. Use when you want to get
-  the latest skill updates, or when prompted by a SKILLS_UPDATE_AVAILABLE notice.
+  Update the Lyra skill library — pulls latest from git and re-symlinks any new skills. Use when you want to get the latest
+  skill updates, or when prompted by a SKILLS_UPDATE_AVAILABLE notice.
 allowed-tools:
   - Bash
 ---
 
 ## lyra-update
 
-Pull the latest Lyra skills from git, recompile, and re-install.
+Pull the latest Lyra skills from git and re-install.
 
 ### Find the repo root
 
@@ -63,4 +63,4 @@ ln -snf "$REPO_ROOT/lib/preflight/scripts" "$HOME/.claude/shared/scripts"
 
 ### Step 4: Report
 
-Summarize: new version installed, which skills were recompiled, any new skills now linked.
+Summarize: new version installed, any new skills now linked.
