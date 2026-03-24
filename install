@@ -27,17 +27,6 @@ echo "Lyra install"
 echo "  Repo: $REPO_ROOT"
 echo ""
 
-# Build if .agents/ is missing or empty
-if [ ! -d "$REPO_ROOT/.agents/skills" ] || [ -z "$(ls -A "$REPO_ROOT/.agents/skills" 2>/dev/null)" ]; then
-  if ! command -v bun &>/dev/null; then
-    echo "ERROR: Bun is required to build skills. Install from https://bun.sh" >&2
-    exit 1
-  fi
-  echo "Building skills..."
-  bun "$REPO_ROOT/scripts/build.ts"
-  echo ""
-fi
-
 # Symlink public skills into ~/.claude/skills/
 mkdir -p "$HOME/.claude/skills"
 linked=0
@@ -64,7 +53,7 @@ mkdir -p "$HOME/.claude/shared"
 if [ -d "$HOME/.claude/shared/scripts" ] && [ ! -L "$HOME/.claude/shared/scripts" ]; then
   echo "SKIP shared/scripts — real directory exists at $HOME/.claude/shared/scripts (not overwriting)"
 else
-  ln -snf "$REPO_ROOT/shared/scripts" "$HOME/.claude/shared/scripts"
+  ln -snf "$REPO_ROOT/lib/preflight/scripts" "$HOME/.claude/shared/scripts"
 fi
 
 echo ""

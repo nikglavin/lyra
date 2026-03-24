@@ -13,9 +13,9 @@ const REPO_ROOT = execSync(`git -C ${JSON.stringify(import.meta.dir)} rev-parse 
 const SKILLS_DIR = join(REPO_ROOT, "skills");
 const DIST_DIR = join(REPO_ROOT, ".agents", "skills");
 
-// Resolve all {{shared/filename.md}} includes in content
+// Resolve all {{path/to/file.md}} includes in content
 function resolveIncludes(content: string, tmplPath: string): string {
-	return content.replace(/\{\{(shared\/[^}]+)\}\}/g, (_match, ref: string) => {
+	return content.replace(/\{\{([^}]+)\}\}/g, (_match, ref: string) => {
 		const partialPath = join(REPO_ROOT, ref);
 		if (!existsSync(partialPath)) {
 			console.error(`ERROR: Missing shared partial '${ref}' referenced in ${tmplPath}`);

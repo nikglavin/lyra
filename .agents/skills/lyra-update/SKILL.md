@@ -37,13 +37,7 @@ If the user declines, stop here.
 git -C "$REPO_ROOT" pull --tags
 ```
 
-### Step 3: Build
-
-```bash
-bun "$REPO_ROOT/scripts/build.ts"
-```
-
-### Step 4: Re-symlink new skills
+### Step 3: Re-symlink new skills
 
 Re-symlink any skills added in the update:
 
@@ -64,9 +58,9 @@ done
 Also re-link shared scripts in case new ones were added:
 
 ```bash
-ln -snf "$REPO_ROOT/shared/scripts" "$HOME/.claude/shared/scripts"
+ln -snf "$REPO_ROOT/lib/preflight/scripts" "$HOME/.claude/shared/scripts"
 ```
 
-### Step 5: Report
+### Step 4: Report
 
 Summarize: new version installed, which skills were recompiled, any new skills now linked.

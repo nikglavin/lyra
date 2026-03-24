@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Find repo root: two levels up from this script (scripts/ -> shared/ -> root)
+# Find repo root: three levels up from this script (scripts/ -> preflight/ -> lib/ -> root)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 CACHE_FILE="/tmp/lyra-preflight-check"
 MAX_AGE=86400  # 24 hours in seconds
