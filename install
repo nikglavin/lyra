@@ -69,4 +69,6 @@ fi
 
 echo ""
 echo "Done. $linked skill(s) linked."
-[ "$skipped" -gt 0 ] && echo "$skipped skill(s) skipped (real directories — remove manually to relink)."
+if [ "$skipped" -gt 0 ]; then
+  echo "$skipped skill(s) skipped (real directories — remove manually to relink)."
+fi
