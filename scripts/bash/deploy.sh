@@ -101,7 +101,7 @@ jq --tab --arg v "$NEW_VERSION" '.version = $v' "$PACKAGE_JSON" >"$PACKAGE_JSON.
 # ── 9. Commit, tag, push ──────────────────────────────────────────────────────
 git -C "$REPO_ROOT" add "$REPO_ROOT/.agents/" "$PACKAGE_JSON"
 git -C "$REPO_ROOT" commit -m "release v$NEW_VERSION"
-git -C "$REPO_ROOT" tag "v$NEW_VERSION"
+git -C "$REPO_ROOT" tag -a "v$NEW_VERSION" -m "release v$NEW_VERSION"
 git -C "$REPO_ROOT" push origin HEAD --follow-tags
 
 echo ""
