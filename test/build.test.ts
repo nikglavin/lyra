@@ -222,6 +222,38 @@ test("build: SKILL.md.tmpl takes precedence over SKILL.md when both exist", () =
 	}
 });
 
+test('build: SKILL.md.tmpl resolves {{"path/to/file"}} quoted includes', () => {
+	const dir = mkdtempSync(join(tmpdir(), "lyra-build-"));
+	try {
+		setupFakeRepo(dir);
+
+		mkdirSync(join(dir, "lib", "partials"), { recursive: true });
+		writeFileSync(join(dir, "lib", "partials", "hello.md"), "Hello from quoted partial!\n");
+
+		addSkill(
+			dir,
+			"quoted-skill",
+			`---
+name: quoted-skill
+description: A template skill with quoted include syntax.
+---
+
+{{"lib/partials/hello.md"}}
+`,
+			"SKILL.md.tmpl",
+		);
+
+		const { exitCode } = runBuild(dir);
+		expect(exitCode).toBe(0);
+
+		const out = readFileSync(join(dir, ".agents", "skills", "quoted-skill", "SKILL.md"), "utf8");
+		expect(out).toContain("Hello from quoted partial!");
+		expect(out).not.toContain('"lib/partials/hello.md"');
+	} finally {
+		rmSync(dir, { recursive: true });
+	}
+});
+
 test("build: second run reports Unchanged when nothing changed", () => {
 	const dir = mkdtempSync(join(tmpdir(), "lyra-build-"));
 	try {
