@@ -106,6 +106,31 @@ description: A template skill.
 	}
 });
 
+test("build: include path that escapes repo root is rejected", () => {
+	const dir = mkdtempSync(join(tmpdir(), "lyra-build-"));
+	try {
+		setupFakeRepo(dir);
+		addSkill(
+			dir,
+			"evil-skill",
+			`---
+name: evil-skill
+description: Attempts path traversal.
+---
+
+{{../../etc/passwd}}
+`,
+			"SKILL.md.tmpl",
+		);
+
+		const { exitCode, output } = runBuild(dir);
+		expect(exitCode).toBe(1);
+		expect(output).toContain("escapes repo root");
+	} finally {
+		rmSync(dir, { recursive: true });
+	}
+});
+
 test("build: missing include partial exits with code 1", () => {
 	const dir = mkdtempSync(join(tmpdir(), "lyra-build-"));
 	try {
@@ -172,6 +197,26 @@ test("build: resource subdirectory is mirrored to .agents/skills/", () => {
 		const outFile = join(dir, ".agents", "skills", "res-skill", "resources", "shell.html");
 		expect(existsSync(outFile)).toBe(true);
 		expect(readFileSync(outFile, "utf8")).toBe("<html>test</html>");
+	} finally {
+		rmSync(dir, { recursive: true });
+	}
+});
+
+test("build: SKILL.md.tmpl takes precedence over SKILL.md when both exist", () => {
+	const dir = mkdtempSync(join(tmpdir(), "lyra-build-"));
+	try {
+		setupFakeRepo(dir);
+		// Plain SKILL.md with known content
+		addSkill(dir, "dual-skill", "plain content\n");
+		// .tmpl with different content in the same directory
+		writeFileSync(join(dir, "skills", "dual-skill", "SKILL.md.tmpl"), "template content\n");
+
+		const { exitCode } = runBuild(dir);
+		expect(exitCode).toBe(0);
+
+		const out = readFileSync(join(dir, ".agents", "skills", "dual-skill", "SKILL.md"), "utf8");
+		expect(out).toBe("template content\n");
+		expect(out).not.toContain("plain content");
 	} finally {
 		rmSync(dir, { recursive: true });
 	}

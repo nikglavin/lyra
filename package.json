@@ -4,19 +4,19 @@
 	"description": "A skill library for Claude Code",
 	"type": "module",
 	"scripts": {
-		"test": "bun test",
 		"build": "bun scripts/build.ts",
-		"link": "./install",
 		"deploy": "./scripts/bash/deploy.sh",
-		"format": "oxfmt --write",
 		"format:check": "oxfmt --check",
-		"typecheck": "bun x tsc",
-		"lint": "bun run lint:ts && bun run lint:sh && bun run lint:skills",
+		"format:sh": "bun scripts/lint-sh.ts --write",
+		"format": "oxfmt --write",
+		"link": "./install",
+		"lint:sh": "bun scripts/lint-sh.ts",
 		"lint:skills": "bun scripts/lint-skill.ts",
 		"lint:ts": "oxlint scripts/ test/",
-		"lint:sh": "bun scripts/lint-sh.ts",
-		"format:sh": "bun scripts/lint-sh.ts --write",
-		"setup-hooks": "ln -sf \"$(git rev-parse --show-toplevel)/scripts/bash/pre-commit.sh\" .git/hooks/pre-commit && echo 'pre-commit hook installed'"
+		"lint": "bun run lint:ts && bun run lint:sh && bun run lint:skills",
+		"setup-hooks": "ln -sf \"$(git rev-parse --show-toplevel)/scripts/bash/pre-commit.sh\" .git/hooks/pre-commit && echo 'pre-commit hook installed'",
+		"test": "bun test",
+		"typecheck": "bun x tsc"
 	},
 	"engines": {
 		"bun": ">=1"

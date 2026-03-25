@@ -27,6 +27,12 @@ echo "Lyra install"
 echo "  Repo: $REPO_ROOT"
 echo ""
 
+# Guard: .agents/skills/ must exist and be non-empty (committed in repo)
+if [ ! -d "$REPO_ROOT/.agents/skills" ] || [ -z "$(ls -A "$REPO_ROOT/.agents/skills" 2>/dev/null)" ]; then
+  echo "ERROR: .agents/skills/ is missing or empty in $REPO_ROOT — the repo may be incomplete." >&2
+  exit 1
+fi
+
 # Symlink public skills into ~/.claude/skills/
 mkdir -p "$HOME/.claude/skills"
 linked=0

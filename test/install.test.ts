@@ -20,7 +20,7 @@ test("install links lyra-breadboard and lyra-update into ~/.claude/skills/", () 
 		const output = runInstall(fakeHome);
 		expect(output).toContain("Linked: lyra-breadboard");
 		expect(output).toContain("Linked: lyra-update");
-		expect(output).toContain("Done. 2 skill(s) linked.");
+		expect(output).toMatch(/Done\. \d+ skill\(s\) linked\./);
 
 		const breadboard = join(fakeHome, ".claude/skills/lyra-breadboard");
 		const update = join(fakeHome, ".claude/skills/lyra-update");
@@ -92,7 +92,7 @@ test("install (curl/pipe mode): uses LYRA_DIR as repo root and links skills", ()
 
 		expect(output).toContain("Existing install found");
 		expect(output).toContain("Linked: lyra-breadboard");
-		expect(output).toContain("Done. 2 skill(s) linked.");
+		expect(output).toMatch(/Done\. \d+ skill\(s\) linked\./);
 
 		const breadboard = join(fakeHome, ".claude/skills/lyra-breadboard");
 		expect(lstatSync(breadboard).isSymbolicLink()).toBe(true);

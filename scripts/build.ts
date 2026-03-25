@@ -4,7 +4,7 @@
 // Run from the repo root.
 
 import { readFileSync, readdirSync, statSync, existsSync, mkdirSync, copyFileSync, chmodSync } from "fs";
-import { join } from "path";
+import { join, sep } from "path";
 import { execSync } from "child_process";
 
 const REPO_ROOT = execSync(`git -C ${JSON.stringify(import.meta.dir)} rev-parse --show-toplevel`)
@@ -17,6 +17,10 @@ const DIST_DIR = join(REPO_ROOT, ".agents", "skills");
 function resolveIncludes(content: string, tmplPath: string): string {
 	return content.replace(/\{\{([^}]*\/[^}]+)\}\}/g, (_match, ref: string) => {
 		const partialPath = join(REPO_ROOT, ref);
+		if (!partialPath.startsWith(REPO_ROOT + sep)) {
+			console.error(`ERROR: Include '${ref}' escapes repo root — path traversal not allowed`);
+			process.exit(1);
+		}
 		if (!existsSync(partialPath)) {
 			console.error(`ERROR: Missing shared partial '${ref}' referenced in ${tmplPath}`);
 			process.exit(1);
