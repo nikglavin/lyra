@@ -42,6 +42,17 @@ skills/
 
 Shared partials live in `lib/` and are included via `{{lib/path/to/file.md}}` in `.tmpl` files.
 
+### Pre-commit hook
+
+Install the hook once after cloning:
+
+```bash
+bun run setup-hooks
+```
+
+This symlinks `scripts/bash/pre-commit.sh` into `.git/hooks/pre-commit`. On each commit it runs format checks, typechecking,
+linting, and build.
+
 ## Requirements
 
 - [Claude Code](https://claude.ai/claude-code)
