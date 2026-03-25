@@ -45,9 +45,15 @@ bun run --cwd "$REPO_ROOT" lint:skills
 
 # ── 5. Read current version ───────────────────────────────────────────────────
 PACKAGE_JSON="$REPO_ROOT/package.json"
-CURRENT_VERSION=$(grep '"version"' "$PACKAGE_JSON" | sed 's/.*"version": *"\([^"]*\)".*/\1/')
 
-if [ -z "$CURRENT_VERSION" ]; then
+if ! command -v jq &>/dev/null; then
+  echo "ERROR: jq is required but not installed. Install with: brew install jq" >&2
+  exit 1
+fi
+
+CURRENT_VERSION=$(jq -r '.version' "$PACKAGE_JSON")
+
+if [ -z "$CURRENT_VERSION" ] || [ "$CURRENT_VERSION" = "null" ]; then
   echo "ERROR: Could not read version from $PACKAGE_JSON" >&2
   exit 1
 fi
@@ -87,8 +93,7 @@ read -r CONFIRM
 echo ""
 
 # ── 8. Bump version in package.json ──────────────────────────────────────────
-sed -i.bak "s/\"version\": \"$CURRENT_VERSION\"/\"version\": \"$NEW_VERSION\"/" "$PACKAGE_JSON"
-rm -f "$PACKAGE_JSON.bak"
+jq --tab --arg v "$NEW_VERSION" '.version = $v' "$PACKAGE_JSON" >"$PACKAGE_JSON.tmp" && mv "$PACKAGE_JSON.tmp" "$PACKAGE_JSON"
 
 # ── 9. Commit, tag, push ──────────────────────────────────────────────────────
 git -C "$REPO_ROOT" add "$REPO_ROOT/.agents/" "$PACKAGE_JSON"

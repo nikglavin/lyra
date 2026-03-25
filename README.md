@@ -40,7 +40,7 @@ skills/
     scripts/          # any scripts the skill references
 ```
 
-Shared partials live in `shared/` and are included via `{{shared/filename.md}}` in `.tmpl` files.
+Shared partials live in `lib/` and are included via `{{lib/path/to/file.md}}` in `.tmpl` files.
 
 ## Requirements
 

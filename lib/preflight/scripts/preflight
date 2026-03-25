@@ -5,11 +5,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
-CACHE_FILE="/tmp/lyra-preflight-check"
+# User-specific cache (avoids shared /tmp race on multi-user systems)
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/lyra"
+CACHE_FILE="$CACHE_DIR/preflight-check"
 MAX_AGE=86400  # 24 hours in seconds
 
 # Check cache — skip if fresh
 if [ -f "$CACHE_FILE" ]; then
+  # stat -f is BSD/macOS; stat -c is GNU/Linux
   cache_mtime=$(stat -f "%m" "$CACHE_FILE" 2>/dev/null || stat -c "%Y" "$CACHE_FILE" 2>/dev/null || echo 0)
   now=$(date +%s)
   age=$(( now - cache_mtime ))
@@ -18,6 +21,8 @@ if [ -f "$CACHE_FILE" ]; then
   fi
 fi
 
+mkdir -p "$CACHE_DIR" 2>/dev/null || true
+
 # Fetch tags quietly; exit silently on any error
 git -C "$REPO_ROOT" fetch -q origin --tags 2>/dev/null || exit 0
 
@@ -25,7 +30,7 @@ latest=$(git -C "$REPO_ROOT" tag --sort=-version:refname 2>/dev/null | head -1)
 current=$(git -C "$REPO_ROOT" describe --tags --exact-match HEAD 2>/dev/null || echo "unreleased")
 
 # Write cache timestamp
-date +%s > "$CACHE_FILE" 2>/dev/null || true
+date +%s >"$CACHE_FILE" 2>/dev/null || true
 
 # Bail out if no tags exist yet
 [ -z "$latest" ] && exit 0
