@@ -1,6 +1,7 @@
 node_modules/
 .gstack/
 .DS_Store
+.vscode/
 
 # Secrets — never commit these
 .env

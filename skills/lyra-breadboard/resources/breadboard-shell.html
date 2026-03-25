@@ -398,11 +398,15 @@
 				}
 				var slugs = window.BREADBOARD_GROUP_ORDER || [];
 				if (!slugs.length) {
-					render({ groups: [], ...window.BREADBOARD_META });
+					render({ ...window.BREADBOARD_META, groups: [] });
 					return;
 				}
 				var done = 0;
 				slugs.forEach(function (slug) {
+					if (!/^[a-z0-9-]+$/.test(slug)) {
+						if (++done === slugs.length) render({ ...window.BREADBOARD_META, groups: [] });
+						return;
+					}
 					var s = document.createElement("script");
 					s.src = "./breadboard-group-" + slug + ".js";
 					function finish() {
