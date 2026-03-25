@@ -80,7 +80,8 @@ Organize screens into four system-state groups:
 3. **Core Loop** — Where the primary value is created (the "work" area — dashboards, creation flows, detail views)
 4. **Management** — Settings, history, admin, account
 
-Number screens sequentially across groups (01, 02, 03...) so the handoff has a clear reference system.
+Number screens sequentially within each group using the group slug as a prefix: `auth-01`, `auth-02`, `core-01`, `core-02`,
+etc. This makes every screen ID unique and unambiguous within a single group file.
 
 ### Screen Content Format
 
@@ -127,43 +128,57 @@ designer/engineer needs to know.
 
 ---
 
-### First run: write both files
+## Phase 3: Output Files
+
+Write all files to `$OUTPUT_DIR` (`.lyra/lyra-breadboard/`).
+
+### First run: write all files
 
 1. **`$OUTPUT_DIR/breadboard.html`** — copy `resources/breadboard-shell.html` verbatim using `Write`. **Never modify this
    file again.**
 
-2. **`$OUTPUT_DIR/breadboard-data.js`** — write the data using `Write` with this exact wrapper:
+2. **`$OUTPUT_DIR/breadboard-index.js`** — metadata and group order:
 
 ```js
-window.BREADBOARD_DATA = {
+window.BREADBOARD_META = {
 	product: "App Name",
 	actor: "Primary actor",
 	noun: "Core noun",
 	date: "DD Mon YYYY",
-	groups: [
+};
+window.BREADBOARD_GROUP_ORDER = ["auth", "onboarding", "core", "mgmt"];
+```
+
+Slugs are short kebab-case derived from the group name (e.g. "Entry / Auth" → `auth`, "Core Loop" → `core`). Use whatever
+slugs fit the product — not fixed to these four.
+
+3. **One file per group** — `$OUTPUT_DIR/breadboard-group-{slug}.js`:
+
+```js
+window.BREADBOARD_GROUP_auth = {
+	name: "Entry / Auth",
+	accent: "#6366f1",
+	screens: [
 		{
-			name: "Group Name",
-			accent: "#6366f1",
-			screens: [
-				{
-					num: "01",
-					name: "Screen Name",
-					jtbd: "One sentence: the job this screen does for the user",
-					group: "optional sub-label",
-					flows: ["02 Next Screen"],
-					elements: [
-						{ type: "Heading", content: "Title text" },
-						{ type: "Input", content: "Label", note: "Optional context note" },
-					],
-				},
+			num: "auth-01",
+			name: "Screen Name",
+			jtbd: "One sentence: the job this screen does for the user",
+			flows: ["core-01 Dashboard"],
+			elements: [
+				{ type: "Heading", content: "Title text" },
+				{ type: "Input", content: "Label", note: "Optional context note" },
 			],
 		},
 	],
 };
 ```
 
-**Rule: always use `Write`, never `Edit`.** The data file is always replaced in full — no string matching, no indentation
-risk. Use the full absolute path (`$OUTPUT_DIR/breadboard-data.js`).
+Variable name: slug with hyphens replaced by underscores, prefixed with `BREADBOARD_GROUP_` (e.g. `core-loop` →
+`window.BREADBOARD_GROUP_core_loop`).
+
+Screen `num` format: `{slug}-01`, `{slug}-02`, etc. — sequential within the group, starting at `01`.
+
+**Rule: always use `Write`, never `Edit`.** Every file is always replaced in full.
 
 ### Group accent colors
 
@@ -171,6 +186,7 @@ risk. Use the full absolute path (`$OUTPUT_DIR/breadboard-data.js`).
 - Onboarding: `#f59e0b` (amber)
 - Core Loop: `#10b981` (emerald)
 - Management: `#6b7280` (gray)
+- Custom groups: pick a distinct color
 
 ### After writing, present the path
 
@@ -188,6 +204,12 @@ Use `AskUserQuestion` to ask: "Want to add, remove, or rename any screens? Or ad
 
 **On every iteration:**
 
-- Rewrite only `$OUTPUT_DIR/breadboard-data.js` using `Write` — never touch `breadboard.html`
-- Keep screen numbers stable — append new screens at the end of the relevant group, never renumber existing ones
+- Identify which group is changing → rewrite **only that group's file** (`$OUTPUT_DIR/breadboard-group-{slug}.js`) using
+  `Write`
+- If metadata changes (product name, date, etc.) → rewrite only `$OUTPUT_DIR/breadboard-index.js`
+- If a group is added or removed → rewrite `breadboard-index.js` (update `BREADBOARD_GROUP_ORDER`) and write/remove the group
+  file
+- Keep screen numbers stable — append new screens at the end of the group with the next `{slug}-NN` number, never renumber
+  existing ones
+- **Never touch `breadboard.html`**
 - After writing, re-present the `file://` path so the user can refresh their browser
