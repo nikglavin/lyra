@@ -5,6 +5,8 @@ description:
   skill updates, or when prompted by a SKILLS_UPDATE_AVAILABLE notice.
 allowed-tools:
   - Bash
+metadata:
+  version: 1.0.0
 ---
 
 ## lyra-update

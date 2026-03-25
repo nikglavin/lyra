@@ -9,6 +9,8 @@ description: >
   understand the screens and user flow. Also trigger when a user shares a business idea
   and asks "where do I start" or "what are the screens". The output is a browser-ready
   HTML artifact — a handoff-ready breadboard for designers and engineers to work from in parallel.
+metadata:
+  version: 1.0.0
 ---
 
 ## Preflight
