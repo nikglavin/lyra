@@ -95,7 +95,8 @@ echo ""
 # ── 8. Bump version in package.json ──────────────────────────────────────────
 jq --tab --arg v "$NEW_VERSION" '.version = $v' "$PACKAGE_JSON" >"$PACKAGE_JSON.tmp" && mv "$PACKAGE_JSON.tmp" "$PACKAGE_JSON"
 # Normalise only package.json (bun run format would reformat all files, creating unintended changes)
-"$REPO_ROOT/node_modules/.bin/oxfmt" --write "$PACKAGE_JSON"
+# Non-fatal: version is correctly bumped by jq regardless; formatting is cosmetic
+"$REPO_ROOT/node_modules/.bin/oxfmt" --write "$PACKAGE_JSON" 2>/dev/null || true
 
 # ── 9. Commit, tag, push ──────────────────────────────────────────────────────
 git -C "$REPO_ROOT" add "$REPO_ROOT/.agents/" "$PACKAGE_JSON"

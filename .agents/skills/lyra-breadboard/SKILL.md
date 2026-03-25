@@ -7,8 +7,8 @@ description: >
   a SaaS", "map out my app idea", "create a sitemap", "plan a new feature", "breadboard
   this", "wireframe the flow", or any time someone describes an app concept and wants to
   understand the screens and user flow. Also trigger when a user shares a business idea
-  and asks "where do I start" or "what are the screens". The output is a single HTML file
-  — a handoff-ready artifact for designers and engineers to work from in parallel.
+  and asks "where do I start" or "what are the screens". The output is a browser-ready
+  HTML artifact — a handoff-ready breadboard for designers and engineers to work from in parallel.
 ---
 
 ## Preflight
@@ -103,21 +103,18 @@ Each element supports an optional `note` field — one sentence of conditional l
 
 ---
 
-## Phase 3: Output File
+## Phase 3: Output Files
 
-The breadboard is a **single file: `breadboard.html`**, written to the project root (or a `design/` folder if one exists).
+The breadboard is **two co-located files** — write them to the project root (or `design/` if that folder exists).
 
-Copy `resources/breadboard-shell.html` into the project on first run. It contains two clearly marked sections:
+### First run: write both files
 
-1. **DATA block** — `<script type="application/json" id="bb-data">` — Claude reads and rewrites **only this block** on every iteration
-2. **RENDERER** — pure JS below a `never edit` comment — never touched
+1. **`breadboard.html`** — copy `resources/breadboard-shell.html` verbatim using `Write`. **Never modify this file again.**
 
-The file opens directly in any browser (`file://`) — no server required.
+2. **`breadboard-data.js`** — write the data using `Write` with this exact wrapper:
 
-**Data schema:**
-
-```json
-{
+```js
+window.BREADBOARD_DATA = {
   "product": "App Name",
   "actor": "Primary actor",
   "noun": "Core noun",
@@ -141,8 +138,10 @@ The file opens directly in any browser (`file://`) — no server required.
       ]
     }
   ]
-}
+};
 ```
+
+**Rule: always use `Write`, never `Edit`.** The data file is always replaced in full — no string matching, no indentation risk.
 
 ### Group accent colors
 
@@ -151,17 +150,21 @@ The file opens directly in any browser (`file://`) — no server required.
 - Core Loop: `#10b981` (emerald)
 - Management: `#6b7280` (gray)
 
+### After writing, present the path
+
+Output this to the user (use the real absolute path):
+
+> Open in browser: `file:///absolute/path/to/breadboard.html`
+
+Also tell the user: how many screens were generated, which groups, one sentence for the designer, one for the engineer.
+
 ---
 
 ## Phase 4: Iteration
 
-After delivering the file, tell the user:
-
-- The file path — open directly in any browser, no server needed
-- How many screens were generated and which groups
-- One sentence each: what to tell the designer / what to tell the engineer
-
 Use `AskUserQuestion` to ask: "Want to add, remove, or rename any screens? Or adjust any flows?"
 
-**On every iteration, only rewrite the DATA block inside `breadboard.html`.** Never touch the RENDERER section.
-Keep screen numbers stable — append new screens at the end of the relevant group, don't renumber existing ones.
+**On every iteration:**
+- Rewrite only `breadboard-data.js` using `Write` — never touch `breadboard.html`
+- Keep screen numbers stable — append new screens at the end of the relevant group, never renumber existing ones
+- After writing, re-present the `file://` path so the user can refresh their browser

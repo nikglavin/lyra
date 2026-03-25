@@ -55,10 +55,14 @@ for skill_dir in "$REPO_ROOT/.agents/skills"/*/; do
 done
 ```
 
-Also re-link shared scripts in case new ones were added:
+Also re-link shared scripts in case new ones were added (skip if a real directory exists — same guard as `install`):
 
 ```bash
-ln -snf "$REPO_ROOT/lib/preflight/scripts" "$HOME/.claude/shared/scripts"
+if [ -d "$HOME/.claude/shared/scripts" ] && [ ! -L "$HOME/.claude/shared/scripts" ]; then
+  echo "SKIP shared/scripts — real directory exists at $HOME/.claude/shared/scripts (not overwriting)"
+else
+  ln -snf "$REPO_ROOT/lib/preflight/scripts" "$HOME/.claude/shared/scripts"
+fi
 ```
 
 ### Step 4: Report

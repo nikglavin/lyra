@@ -271,11 +271,9 @@
 		<div id="root"></div>
 
 		<!-- ═══════════════════════════════════════════════════════
-     DATA — Claude only ever edits this block
+     DATA — Claude writes breadboard-data.js, never this file
 ════════════════════════════════════════════════════════ -->
-		<script type="application/json" id="bb-data">
-			{}
-		</script>
+		<script src="./breadboard-data.js"></script>
 
 		<!-- ═══════════════════════════════════════════════════════
      RENDERER — never edit below this line
@@ -391,7 +389,12 @@
 				(data.groups || []).forEach((g) => root.appendChild(renderGroup(g)));
 			}
 
-			render(JSON.parse(document.getElementById("bb-data").textContent));
+			if (!window.BREADBOARD_DATA) {
+				document.getElementById("root").innerHTML =
+					"<p style='font-family:sans-serif;padding:2rem;color:#ef4444'>Missing <code>breadboard-data.js</code> — run <code>/lyra-breadboard</code> to generate it.</p>";
+			} else {
+				render(window.BREADBOARD_DATA);
+			}
 		</script>
 	</body>
 </html>

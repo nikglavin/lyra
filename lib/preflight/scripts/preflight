@@ -36,5 +36,5 @@ date +%s >"$CACHE_FILE" 2>/dev/null || true
 [ -z "$latest" ] && exit 0
 
 if [ "$latest" != "$current" ]; then
-  echo "SKILLS_UPDATE_AVAILABLE: $current → $latest — run: git -C $REPO_ROOT pull --tags"
+  echo "SKILLS_UPDATE_AVAILABLE: $current → $latest — run: git -C \"$REPO_ROOT\" pull --tags"
 fi

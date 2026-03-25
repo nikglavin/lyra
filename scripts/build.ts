@@ -3,7 +3,7 @@
 // Usage: bun scripts/build.ts
 // Run from the repo root.
 
-import { readFileSync, readdirSync, statSync, existsSync, mkdirSync, copyFileSync, chmodSync } from "fs";
+import { readFileSync, readdirSync, statSync, existsSync, mkdirSync, copyFileSync, chmodSync, realpathSync } from "fs";
 import { join, sep } from "path";
 import { execSync } from "child_process";
 
@@ -25,7 +25,14 @@ function resolveIncludes(content: string, tmplPath: string): string {
 			console.error(`ERROR: Missing shared partial '${ref}' referenced in ${tmplPath}`);
 			process.exit(1);
 		}
-		return readFileSync(partialPath, "utf8");
+		// Dereference symlinks before reading — prevents a committed symlink from
+		// pointing outside the repo and leaking files into compiled output.
+		const realPath = realpathSync(partialPath);
+		if (!realPath.startsWith(REPO_ROOT + sep)) {
+			console.error(`ERROR: Include '${ref}' resolves via symlink outside repo root — not allowed`);
+			process.exit(1);
+		}
+		return readFileSync(realPath, "utf8");
 	});
 }
 
