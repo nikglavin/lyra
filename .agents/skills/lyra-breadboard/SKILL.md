@@ -24,6 +24,20 @@ If output contains `SKILLS_UPDATE_AVAILABLE`: use AskUserQuestion to ask if they
 `lyra-update` skill.
 
 
+## Output Directory
+
+Skill artifacts are written to `.lyra/<skill-name>/` inside the project root, not the project root itself. This keeps generated files out of the way and clearly attributed to the skill that produced them.
+
+```bash
+OUTPUT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.lyra/SKILL_NAME"
+mkdir -p "$OUTPUT_DIR"
+```
+
+Replace `SKILL_NAME` with the skill's `name` value from its frontmatter.
+
+When writing files, use `$OUTPUT_DIR/<filename>` as the path. After writing, tell the user the full path so they can find the output.
+
+
 # Breadboarding & Logic Mapping
 
 Turn a vague idea into a numbered, labeled screen flow that a designer and engineer can
@@ -107,13 +121,13 @@ Each element supports an optional `note` field — one sentence of conditional l
 
 ## Phase 3: Output Files
 
-The breadboard is **two co-located files** — write them to the project root (or `design/` if that folder exists).
+The breadboard is **two co-located files** — write them to `$OUTPUT_DIR` (`.lyra/lyra-breadboard/` inside the project root).
 
 ### First run: write both files
 
-1. **`breadboard.html`** — copy `resources/breadboard-shell.html` verbatim using `Write`. **Never modify this file again.**
+1. **`$OUTPUT_DIR/breadboard.html`** — copy `resources/breadboard-shell.html` verbatim using `Write`. **Never modify this file again.**
 
-2. **`breadboard-data.js`** — write the data using `Write` with this exact wrapper:
+2. **`$OUTPUT_DIR/breadboard-data.js`** — write the data using `Write` with this exact wrapper:
 
 ```js
 window.BREADBOARD_DATA = {
@@ -143,7 +157,7 @@ window.BREADBOARD_DATA = {
 };
 ```
 
-**Rule: always use `Write`, never `Edit`.** The data file is always replaced in full — no string matching, no indentation risk.
+**Rule: always use `Write`, never `Edit`.** The data file is always replaced in full — no string matching, no indentation risk. Use the full absolute path (`$OUTPUT_DIR/breadboard-data.js`).
 
 ### Group accent colors
 
@@ -156,7 +170,7 @@ window.BREADBOARD_DATA = {
 
 Output this to the user (use the real absolute path):
 
-> Open in browser: `file:///absolute/path/to/breadboard.html`
+> Open in browser: `file:///absolute/path/to/.lyra/lyra-breadboard/breadboard.html`
 
 Also tell the user: how many screens were generated, which groups, one sentence for the designer, one for the engineer.
 
@@ -167,6 +181,6 @@ Also tell the user: how many screens were generated, which groups, one sentence 
 Use `AskUserQuestion` to ask: "Want to add, remove, or rename any screens? Or adjust any flows?"
 
 **On every iteration:**
-- Rewrite only `breadboard-data.js` using `Write` — never touch `breadboard.html`
+- Rewrite only `$OUTPUT_DIR/breadboard-data.js` using `Write` — never touch `breadboard.html`
 - Keep screen numbers stable — append new screens at the end of the relevant group, never renumber existing ones
 - After writing, re-present the `file://` path so the user can refresh their browser
