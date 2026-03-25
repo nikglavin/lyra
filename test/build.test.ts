@@ -72,7 +72,7 @@ test("build: plain SKILL.md is copied to .agents/skills/", () => {
 	}
 });
 
-test("build: SKILL.md.tmpl resolves {{path/to/file}} includes", () => {
+test("build: SKILL.tmpl.md resolves {{path/to/file}} includes", () => {
 	const dir = mkdtempSync(join(tmpdir(), "lyra-build-"));
 	try {
 		setupFakeRepo(dir);
@@ -92,7 +92,7 @@ description: A template skill.
 
 {{lib/partials/hello.md}}
 `,
-			"SKILL.md.tmpl",
+			"SKILL.tmpl.md",
 		);
 
 		const { exitCode } = runBuild(dir);
@@ -120,7 +120,7 @@ description: Attempts path traversal.
 
 {{../../etc/passwd}}
 `,
-			"SKILL.md.tmpl",
+			"SKILL.tmpl.md",
 		);
 
 		const { exitCode, output } = runBuild(dir);
@@ -145,7 +145,7 @@ description: References a missing partial.
 
 {{lib/does/not/exist.md}}
 `,
-			"SKILL.md.tmpl",
+			"SKILL.tmpl.md",
 		);
 
 		const { exitCode, output } = runBuild(dir);
@@ -170,7 +170,7 @@ description: Skill with a prose placeholder.
 
 Replace {{placeholder}} with your actual value.
 `;
-		addSkill(dir, "my-skill", contentWithPlaceholder, "SKILL.md.tmpl");
+		addSkill(dir, "my-skill", contentWithPlaceholder, "SKILL.tmpl.md");
 
 		const { exitCode } = runBuild(dir);
 		expect(exitCode).toBe(0);
@@ -202,14 +202,14 @@ test("build: resource subdirectory is mirrored to .agents/skills/", () => {
 	}
 });
 
-test("build: SKILL.md.tmpl takes precedence over SKILL.md when both exist", () => {
+test("build: SKILL.tmpl.md takes precedence over SKILL.md when both exist", () => {
 	const dir = mkdtempSync(join(tmpdir(), "lyra-build-"));
 	try {
 		setupFakeRepo(dir);
 		// Plain SKILL.md with known content
 		addSkill(dir, "dual-skill", "plain content\n");
 		// .tmpl with different content in the same directory
-		writeFileSync(join(dir, "skills", "dual-skill", "SKILL.md.tmpl"), "template content\n");
+		writeFileSync(join(dir, "skills", "dual-skill", "SKILL.tmpl.md"), "template content\n");
 
 		const { exitCode } = runBuild(dir);
 		expect(exitCode).toBe(0);
@@ -222,7 +222,7 @@ test("build: SKILL.md.tmpl takes precedence over SKILL.md when both exist", () =
 	}
 });
 
-test('build: SKILL.md.tmpl resolves {{"path/to/file"}} quoted includes', () => {
+test('build: SKILL.tmpl.md resolves {{"path/to/file"}} quoted includes', () => {
 	const dir = mkdtempSync(join(tmpdir(), "lyra-build-"));
 	try {
 		setupFakeRepo(dir);
@@ -240,7 +240,7 @@ description: A template skill with quoted include syntax.
 
 {{"lib/partials/hello.md"}}
 `,
-			"SKILL.md.tmpl",
+			"SKILL.tmpl.md",
 		);
 
 		const { exitCode } = runBuild(dir);

@@ -73,7 +73,7 @@ const compiled: string[] = [];
 const unchanged: string[] = [];
 
 for (const { name: skillName, fullPath: skillDir } of skillDirs) {
-	const tmplPath = join(skillDir, "SKILL.md.tmpl");
+	const tmplPath = join(skillDir, "SKILL.tmpl.md");
 	const srcPath = join(skillDir, "SKILL.md");
 
 	// .tmpl takes precedence over plain SKILL.md
