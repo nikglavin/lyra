@@ -1,14 +1,12 @@
 ---
 name: lyra-breadboard
 description: >
-  Breadboarding — turns a vague app idea into a lightweight structural wireframe.
-  Use this skill whenever the user wants to map out a new product, SaaS, feature set, or
-  app idea before any design or engineering begins. Trigger on phrases like "help me build
-  a SaaS", "map out my app idea", "create a sitemap", "plan a new feature", "breadboard
-  this", "wireframe the flow", or any time someone describes an app concept and wants to
-  understand the screens and user flow. Also trigger when a user shares a business idea
-  and asks "where do I start" or "what are the screens". The output is a browser-ready
-  HTML artifact — a handoff-ready breadboard for designers and engineers to work from in parallel.
+  Breadboarding — turns a vague app idea into a lightweight structural wireframe. Use this skill whenever the user wants to
+  map out a new product, SaaS, feature set, or app idea before any design or engineering begins. Trigger on phrases like
+  "help me build a SaaS", "map out my app idea", "create a sitemap", "plan a new feature", "breadboard this", "wireframe the
+  flow", or any time someone describes an app concept and wants to understand the screens and user flow. Also trigger when a
+  user shares a business idea and asks "where do I start" or "what are the screens". The output is a browser-ready HTML
+  artifact — a handoff-ready breadboard for designers and engineers to work from in parallel.
 metadata:
   version: 1.0.0
 ---
@@ -42,17 +40,16 @@ output.
 
 # Breadboarding & Logic Mapping
 
-Turn a vague idea into a numbered, labeled screen flow that a designer and engineer can
-work from in parallel. The output is a single HTML breadboard — not a mockup, not a
-wireframe with visual design — just screens, their contents at a container-component level,
-and the actions that connect them.
+Turn a vague idea into a numbered, labeled screen flow that a designer and engineer can work from in parallel. The output is
+a single HTML breadboard — not a mockup, not a wireframe with visual design — just screens, their contents at a
+container-component level, and the actions that connect them.
 
 ---
 
 ## Phase 1: Upfront Questions
 
-Use the `AskUserQuestion` tool to collect all inputs before generating anything. Ask up to 4
-questions at once — never drip them one at a time.
+Use the `AskUserQuestion` tool to collect all inputs before generating anything. Ask up to 4 questions at once — never drip
+them one at a time.
 
 **First call** — ask these three together:
 
@@ -71,8 +68,8 @@ Wait for the user's answers before proceeding.
 
 ## Phase 2: Generate the Breadboard
 
-Once you have the answers, produce the complete JSON data in one pass. Do not ask more
-questions — infer what you need from the context and produce a complete draft.
+Once you have the answers, produce the complete JSON data in one pass. Do not ask more questions — infer what you need from
+the context and produce a complete draft.
 
 ### Screen Structure
 
@@ -83,83 +80,90 @@ Organize screens into four system-state groups:
 3. **Core Loop** — Where the primary value is created (the "work" area — dashboards, creation flows, detail views)
 4. **Management** — Settings, history, admin, account
 
-Number screens sequentially across groups (01, 02, 03...) so the handoff has a clear
-reference system.
+Number screens sequentially across groups (01, 02, 03...) so the handoff has a clear reference system.
 
 ### Screen Content Format
 
 Each screen contains only structural elements — no visual design, no icons, no images.
 
-**Content brevity rule:** use the shortest description that communicates intent — "Email" not "Enter your email address". Labels, not copy.
+**Content brevity rule:** use the shortest description that communicates intent — "Email" not "Enter your email address".
+Labels, not copy.
 
 Element types:
 
-- **Form** — a group of input fields. `content` names the form; `fields` array lists each field with `type` (Input / Select / Toggle / Textarea) and `content` (short label).
-- **List** — a repeating data structure. `content` names the list; `fields` array defines each column with `type` (column label) and `content` (what it contains).
-- **Component** — a contained info block. `content` names the component; `fields` array lists each data point with `type` (label) and `content` (description).
+- **Form** — a group of input fields. `content` names the form; `fields` array lists each field with `type` (Input / Select /
+  Toggle / Textarea) and `content` (short label).
+- **List** — a repeating data structure. `content` names the list; `fields` array defines each column with `type` (column
+  label) and `content` (what it contains).
+- **Component** — a contained info block. `content` names the component; `fields` array lists each data point with `type`
+  (label) and `content` (description).
 - **Button** — primary CTA: `Continue to payment`
 - **Link** — secondary nav or text link: `Back to listings`
-- **Note** — a callout tinted with the group accent colour. Use for conditional behaviour, warnings, or context that belongs on the canvas rather than inside another element.
+- **Note** — a callout tinted with the group accent colour. Use for conditional behaviour, warnings, or context that belongs
+  on the canvas rather than inside another element.
 
-`List` and `Component` elements support optional variant keys — add `"or:empty"`, `"or:filled"`, or `"or:selected"` directly on the element to describe how it looks in that state. The renderer displays these as dashed sub-rows below the fields.
+`List` and `Component` elements support optional variant keys — add `"or:empty"`, `"or:filled"`, or `"or:selected"` directly
+on the element to describe how it looks in that state. The renderer displays these as dashed sub-rows below the fields.
 
 ```json
 { "type": "List", "content": "Photo slots", "fields": [...], "or:empty": "Label + upload prompt", "or:filled": "Thumbnail + label" }
 ```
 
-Each element supports an optional `note` field — one sentence of conditional logic, data source, or behaviour a designer/engineer needs to know.
+Each element supports an optional `note` field — one sentence of conditional logic, data source, or behaviour a
+designer/engineer needs to know.
 
 ```json
-{ "type": "Form", "content": "Sign in", "fields": [
-    { "type": "Input",  "content": "Email" },
-    { "type": "Input",  "content": "Password" },
-    { "type": "Toggle", "content": "Remember me" }
-  ],
-  "note": "Password field shows strength indicator on focus"
+{
+	"type": "Form",
+	"content": "Sign in",
+	"fields": [
+		{ "type": "Input", "content": "Email" },
+		{ "type": "Input", "content": "Password" },
+		{ "type": "Toggle", "content": "Remember me" }
+	],
+	"note": "Password field shows strength indicator on focus"
 }
 ```
 
 ---
 
-## Phase 3: Output Files
-
-The breadboard is **two co-located files** — write them to `$OUTPUT_DIR` (`.lyra/lyra-breadboard/` inside the project root).
-
 ### First run: write both files
 
-1. **`$OUTPUT_DIR/breadboard.html`** — copy `resources/breadboard-shell.html` verbatim using `Write`. **Never modify this file again.**
+1. **`$OUTPUT_DIR/breadboard.html`** — copy `resources/breadboard-shell.html` verbatim using `Write`. **Never modify this
+   file again.**
 
 2. **`$OUTPUT_DIR/breadboard-data.js`** — write the data using `Write` with this exact wrapper:
 
 ```js
 window.BREADBOARD_DATA = {
-  "product": "App Name",
-  "actor": "Primary actor",
-  "noun": "Core noun",
-  "date": "DD Mon YYYY",
-  "groups": [
-    {
-      "name": "Group Name",
-      "accent": "#6366f1",
-      "screens": [
-        {
-          "num": "01",
-          "name": "Screen Name",
-          "jtbd": "One sentence: the job this screen does for the user",
-          "group": "optional sub-label",
-          "flows": ["02 Next Screen"],
-          "elements": [
-            { "type": "Heading", "content": "Title text" },
-            { "type": "Input", "content": "Label", "note": "Optional context note" }
-          ]
-        }
-      ]
-    }
-  ]
+	product: "App Name",
+	actor: "Primary actor",
+	noun: "Core noun",
+	date: "DD Mon YYYY",
+	groups: [
+		{
+			name: "Group Name",
+			accent: "#6366f1",
+			screens: [
+				{
+					num: "01",
+					name: "Screen Name",
+					jtbd: "One sentence: the job this screen does for the user",
+					group: "optional sub-label",
+					flows: ["02 Next Screen"],
+					elements: [
+						{ type: "Heading", content: "Title text" },
+						{ type: "Input", content: "Label", note: "Optional context note" },
+					],
+				},
+			],
+		},
+	],
 };
 ```
 
-**Rule: always use `Write`, never `Edit`.** The data file is always replaced in full — no string matching, no indentation risk. Use the full absolute path (`$OUTPUT_DIR/breadboard-data.js`).
+**Rule: always use `Write`, never `Edit`.** The data file is always replaced in full — no string matching, no indentation
+risk. Use the full absolute path (`$OUTPUT_DIR/breadboard-data.js`).
 
 ### Group accent colors
 
@@ -183,6 +187,7 @@ Also tell the user: how many screens were generated, which groups, one sentence 
 Use `AskUserQuestion` to ask: "Want to add, remove, or rename any screens? Or adjust any flows?"
 
 **On every iteration:**
+
 - Rewrite only `$OUTPUT_DIR/breadboard-data.js` using `Write` — never touch `breadboard.html`
 - Keep screen numbers stable — append new screens at the end of the relevant group, never renumber existing ones
 - After writing, re-present the `file://` path so the user can refresh their browser

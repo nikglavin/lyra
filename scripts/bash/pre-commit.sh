@@ -11,4 +11,5 @@ bun run typecheck
 bun run lint:ts
 bun run lint:sh
 bun run build
+git add .agents/
 bun run lint:skills
