@@ -98,11 +98,52 @@ jq --tab --arg v "$NEW_VERSION" '.version = $v' "$PACKAGE_JSON" >"$PACKAGE_JSON.
 # Non-fatal: version is correctly bumped by jq regardless; formatting is cosmetic
 "$REPO_ROOT/node_modules/.bin/oxfmt" --write "$PACKAGE_JSON" 2>/dev/null || true
 
-# ── 9. Commit, tag, push ──────────────────────────────────────────────────────
+# ── 9. Draft release notes ────────────────────────────────────────────────────
+PREV_TAG=$(git -C "$REPO_ROOT" describe --tags --abbrev=0 HEAD 2>/dev/null || echo "")
+
+RELEASE_NOTES_FILE=$(mktemp /tmp/lyra-release-XXXXXX.md)
+{
+  printf "release v%s\n\n" "$NEW_VERSION"
+
+  # Gather commits since last tag (or all commits if no previous tag)
+  if [ -n "$PREV_TAG" ]; then
+    COMMIT_RANGE="$PREV_TAG..HEAD"
+  else
+    COMMIT_RANGE="HEAD"
+  fi
+
+  # Group by conventional commit type
+  NEW_ITEMS=$(git -C "$REPO_ROOT" log "$COMMIT_RANGE" --pretty=format:"%s" 2>/dev/null |
+    grep -E '^feat(\(.+\))?!?:' | sed 's/^feat[^:]*: /- /' || true)
+  IMPROVED_ITEMS=$(git -C "$REPO_ROOT" log "$COMMIT_RANGE" --pretty=format:"%s" 2>/dev/null |
+    grep -E '^(refactor|chore|perf)(\(.+\))?!?:' | sed 's/^[^:]*: /- /' || true)
+  FIXED_ITEMS=$(git -C "$REPO_ROOT" log "$COMMIT_RANGE" --pretty=format:"%s" 2>/dev/null |
+    grep -E '^fix(\(.+\))?!?:' | sed 's/^fix[^:]*: /- /' || true)
+
+  [ -n "$NEW_ITEMS" ] && printf "New\n%s\n\n" "$NEW_ITEMS"
+  [ -n "$IMPROVED_ITEMS" ] && printf "Improved\n%s\n\n" "$IMPROVED_ITEMS"
+  [ -n "$FIXED_ITEMS" ] && printf "Fixed\n%s\n\n" "$FIXED_ITEMS"
+} >"$RELEASE_NOTES_FILE"
+
+echo "Opening release notes in ${EDITOR:-vi} — save and quit to continue..."
+"${EDITOR:-vi}" "$RELEASE_NOTES_FILE"
+
+RELEASE_MSG=$(cat "$RELEASE_NOTES_FILE")
+rm -f "$RELEASE_NOTES_FILE"
+
+if [ -z "$RELEASE_MSG" ]; then
+  echo "ERROR: Release notes are empty — aborting." >&2
+  exit 1
+fi
+
+# ── 10. Commit, tag, push ─────────────────────────────────────────────────────
 git -C "$REPO_ROOT" add "$REPO_ROOT/.agents/" "$PACKAGE_JSON"
 git -C "$REPO_ROOT" commit -m "release v$NEW_VERSION"
-git -C "$REPO_ROOT" tag -a "v$NEW_VERSION" -m "release v$NEW_VERSION"
+git -C "$REPO_ROOT" tag -a "v$NEW_VERSION" -m "$RELEASE_MSG"
 git -C "$REPO_ROOT" push origin HEAD --follow-tags
 
 echo ""
 echo "Released v$NEW_VERSION"
+echo ""
+echo "Tag message:"
+git -C "$REPO_ROOT" tag -l --format='%(contents)' "v$NEW_VERSION"
