@@ -17,7 +17,7 @@
 					sans-serif;
 				background: #f9fafb;
 				color: #111827;
-				padding: 32px 20px 60px;
+				padding: 32px 20px 72px;
 			}
 
 			/* ── Page header ── */
@@ -86,17 +86,17 @@
 				background: #fff;
 				border: 1px solid #e5e7eb;
 				border-radius: 8px;
-				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 				overflow: hidden;
+			}
+			.card--expanded {
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 			}
 			.card-header {
 				padding: 12px 14px 10px;
-				border-bottom: 1px solid #f3f4f6;
 				border-left: 3px solid var(--accent);
-				cursor: pointer;
 				user-select: none;
 				position: relative;
-				padding-right: 32px;
+				cursor: grab;
 			}
 			.card-header:hover {
 				background: #fafafa;
@@ -142,10 +142,15 @@
 				margin-top: 8px;
 				font-size: 10px;
 				color: #9ca3af;
-				display: flex;
+				display: inline-flex;
 				align-items: center;
 				gap: 5px;
 				line-height: 1.5;
+				cursor: pointer;
+				padding: 2px 0;
+			}
+			.card-expand:hover {
+				color: #6b7280;
 			}
 			.card-expand::before {
 				content: "▶";
@@ -156,6 +161,14 @@
 			.card--expanded .card-expand::before {
 				transform: rotate(90deg);
 			}
+			/* ── Card flows (header, always visible) ── */
+			.card-flows {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 4px;
+				margin-top: 6px;
+			}
+
 			.card-footer {
 				padding: 8px 14px 12px;
 				border-top: 1px solid #f3f4f6;
@@ -172,6 +185,7 @@
 				overflow: hidden;
 				font-size: 12px;
 				line-height: 1.5;
+				position: relative;
 			}
 			.el-main {
 				padding: 7px 10px;
@@ -222,7 +236,7 @@
 				flex: 1;
 				min-width: 0;
 			}
-			/* ── Variants (or:empty / or:filled / or:selected) ── */
+			/* ── Variants ── */
 			.el-variant {
 				display: flex;
 				align-items: baseline;
@@ -265,24 +279,389 @@
 				content: "→ ";
 				color: #9ca3af;
 			}
+
+			/* ════════════════════════════════════════
+			   INTERACTION LAYER
+			═══════════════════════════════════════ */
+
+			/* ── Drag states ── */
+			.card--dragging {
+				border: 2px dashed #d1d5db !important;
+				border-left: 2px dashed #d1d5db !important;
+				box-shadow: none !important;
+				background: #f3f4f6 !important;
+				pointer-events: none;
+			}
+			.card--dragging > * {
+				visibility: hidden;
+			}
+
+			/* ── Card comment button (top-right of header, hover-revealed) ── */
+			.card-comment-btn {
+				position: absolute;
+				top: 8px;
+				right: 8px;
+				width: 26px;
+				height: 26px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: none;
+				border: none;
+				cursor: pointer;
+				color: #9ca3af;
+				opacity: 0;
+				border-radius: 5px;
+				font-size: 11px;
+				font-weight: 700;
+				transition:
+					opacity 0.1s,
+					color 0.1s,
+					background 0.1s;
+				flex-shrink: 0;
+			}
+			.card-header:hover .card-comment-btn {
+				opacity: 1;
+			}
+			.card-comment-btn:hover {
+				color: #374151;
+				background: #f3f4f6;
+			}
+			.card-comment-btn.has-comments {
+				opacity: 1;
+				color: var(--accent);
+			}
+
+			/* ── Element comment button ── */
+			.el-comment-btn {
+				position: absolute;
+				top: 4px;
+				right: 5px;
+				width: 22px;
+				height: 22px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: none;
+				border: none;
+				cursor: pointer;
+				color: #9ca3af;
+				opacity: 0;
+				z-index: 2;
+				font-size: 10px;
+				font-weight: 700;
+				transition:
+					opacity 0.1s,
+					color 0.1s,
+					background 0.1s;
+			}
+			.el:hover .el-comment-btn {
+				opacity: 1;
+			}
+			.el-comment-btn:hover {
+				color: #374151;
+				background: rgba(0, 0, 0, 0.04);
+				border-radius: 4px;
+			}
+			.el-comment-btn.has-comments {
+				opacity: 1;
+				color: var(--el-accent, #6366f1);
+			}
+
+			/* ── Sidebar ── */
+			.bb-sidebar {
+				position: fixed;
+				top: 0;
+				right: 0;
+				bottom: 56px;
+				width: 280px;
+				background: #fff;
+				border-left: 1px solid #e5e7eb;
+				box-shadow: -4px 0 20px rgba(0, 0, 0, 0.07);
+				display: flex;
+				flex-direction: column;
+				z-index: 90;
+				transform: translateX(100%);
+				transition: transform 0.2s ease;
+			}
+			.bb-sidebar--open {
+				transform: translateX(0);
+			}
+			.bb-sidebar-head {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 10px 12px;
+				border-bottom: 1px solid #f3f4f6;
+				flex-shrink: 0;
+			}
+			.bb-sidebar-tabs {
+				display: flex;
+				gap: 2px;
+				flex: 1;
+			}
+			.bb-tab {
+				background: none;
+				border: 1px solid transparent;
+				border-radius: 5px;
+				padding: 4px 10px;
+				font-size: 12px;
+				cursor: pointer;
+				color: #6b7280;
+				transition: all 0.1s;
+			}
+			.bb-tab:hover {
+				color: #111827;
+				background: #f9fafb;
+			}
+			.bb-tab--active {
+				color: #111827;
+				background: #f3f4f6;
+				border-color: #e5e7eb;
+				font-weight: 600;
+			}
+			.bb-sidebar-close {
+				background: none;
+				border: none;
+				cursor: pointer;
+				font-size: 14px;
+				color: #9ca3af;
+				padding: 4px 6px;
+				border-radius: 3px;
+				line-height: 1;
+				flex-shrink: 0;
+			}
+			.bb-sidebar-close:hover {
+				color: #374151;
+				background: #f3f4f6;
+			}
+			.bb-sidebar-body {
+				flex: 1;
+				overflow-y: auto;
+				padding: 14px;
+				display: flex;
+				flex-direction: column;
+				gap: 18px;
+			}
+			.bb-sidebar-empty {
+				font-size: 12px;
+				color: #9ca3af;
+				text-align: center;
+				line-height: 1.6;
+				padding-top: 20px;
+			}
+			.bb-comment-section {
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+			}
+			.bb-comment-screen-header {
+				font-size: 12px;
+				font-weight: 700;
+				color: #111827;
+				padding-bottom: 6px;
+				border-bottom: 1px solid #f3f4f6;
+			}
+			.bb-comment-target-label {
+				font-size: 10px;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+				color: #9ca3af;
+				margin-top: 4px;
+			}
+			.bb-comment-focus-label {
+				font-size: 11px;
+				font-weight: 600;
+				color: #374151;
+				line-height: 1.4;
+			}
+			.bb-comment-row {
+				display: flex;
+				align-items: flex-start;
+				gap: 6px;
+				background: #f9fafb;
+				border: 1px solid #e5e7eb;
+				border-radius: 5px;
+				padding: 7px 8px;
+			}
+			.bb-comment-text {
+				flex: 1;
+				font-size: 12px;
+				color: #374151;
+				line-height: 1.5;
+				word-break: break-word;
+			}
+			.bb-comment-del {
+				background: none;
+				border: none;
+				cursor: pointer;
+				color: #d1d5db;
+				font-size: 14px;
+				padding: 0 2px;
+				flex-shrink: 0;
+				line-height: 1;
+				margin-top: 1px;
+			}
+			.bb-comment-del:hover {
+				color: #ef4444;
+			}
+			.bb-comment-input-wrap {
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+				margin-top: 4px;
+			}
+			.bb-comment-textarea {
+				width: 100%;
+				border: 1px solid #e5e7eb;
+				border-radius: 5px;
+				padding: 7px 9px;
+				font-size: 12px;
+				font-family: inherit;
+				outline: none;
+				resize: none;
+				line-height: 1.5;
+			}
+			.bb-comment-textarea:focus {
+				border-color: #6366f1;
+				box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.12);
+			}
+			.bb-comment-add-btn {
+				align-self: flex-end;
+				background: #111827;
+				color: #fff;
+				border: none;
+				border-radius: 5px;
+				padding: 5px 12px;
+				font-size: 12px;
+				cursor: pointer;
+			}
+			.bb-comment-add-btn:hover {
+				background: #374151;
+			}
+			.bb-comment-add-btn:disabled {
+				background: #e5e7eb;
+				color: #9ca3af;
+				cursor: not-allowed;
+			}
+
+			/* ── Bottom bar ── */
+			.bb-bar {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				height: 56px;
+				background: #111827;
+				border-top: 1px solid #1f2937;
+				padding: 0 20px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				z-index: 80;
+			}
+			.bb-bar-counts {
+				flex: 1;
+				font-size: 12px;
+				color: #6b7280;
+			}
+			.bb-bar-btn {
+				background: #1f2937;
+				border: 1px solid #374151;
+				border-radius: 6px;
+				padding: 6px 12px;
+				font-size: 12px;
+				cursor: pointer;
+				color: #9ca3af;
+				white-space: nowrap;
+				font-family: inherit;
+			}
+			.bb-bar-btn:hover {
+				background: #374151;
+				color: #f9fafb;
+			}
+			.bb-bar-btn--danger {
+				color: #f87171;
+				border-color: #450a0a;
+			}
+			.bb-bar-btn--danger:hover {
+				background: #450a0a;
+				color: #fca5a5;
+			}
+			.bb-bar-btn--primary {
+				background: #6366f1;
+				color: #fff;
+				border-color: #6366f1;
+			}
+			.bb-bar-btn--primary:hover {
+				background: #4f46e5;
+				border-color: #4f46e5;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="root"></div>
 
 		<!-- ═══════════════════════════════════════════════════════
-     RENDERER — never edit below this line
-════════════════════════════════════════════════════════ -->
+		     COMMENT SIDEBAR
+		════════════════════════════════════════════════════════ -->
+		<div class="bb-sidebar" id="bb-sidebar">
+			<div class="bb-sidebar-head">
+				<div class="bb-sidebar-tabs">
+					<button class="bb-tab bb-tab--active" id="bb-tab-all" onclick="BB.setSidebarTab('all')">All</button>
+					<button class="bb-tab" id="bb-tab-selected" onclick="BB.setSidebarTab('selected')">Selected</button>
+				</div>
+				<button class="bb-sidebar-close" onclick="BB.closeSidebar()">✕</button>
+			</div>
+			<div class="bb-sidebar-body" id="bb-sidebar-body"></div>
+		</div>
+
+		<!-- ═══════════════════════════════════════════════════════
+		     BOTTOM BAR
+		════════════════════════════════════════════════════════ -->
+		<div class="bb-bar">
+			<span class="bb-bar-counts" id="bb-bar-counts">0 reorders · 0 comments</span>
+			<button class="bb-bar-btn" onclick="BB.openSidebarAll()">All comments</button>
+			<button class="bb-bar-btn bb-bar-btn--danger" onclick="BB.clearAll()">Clear all</button>
+			<button class="bb-bar-btn bb-bar-btn--primary" id="bb-copy-btn" onclick="BB.copyFeedback()">Copy feedback JSON</button>
+		</div>
+
+		<!-- ═══════════════════════════════════════════════════════
+		     RENDERER — never edit below this line
+		════════════════════════════════════════════════════════ -->
 		<script>
-			function el(tag, attrs, ...children) {
-				const node = document.createElement(tag);
-				if (attrs)
-					Object.entries(attrs).forEach(([k, v]) => {
+			// Material Design "chat_bubble_outline" icon
+			function makeSvgIcon(size) {
+				var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+				svg.setAttribute("viewBox", "0 0 24 24");
+				svg.setAttribute("width", size);
+				svg.setAttribute("height", size);
+				svg.setAttribute("fill", "currentColor");
+				svg.style.display = "block";
+				svg.style.flexShrink = "0";
+				var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+				path.setAttribute("d", "M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z");
+				svg.appendChild(path);
+				return svg;
+			}
+
+			function el(tag, attrs) {
+				var children = Array.prototype.slice.call(arguments, 2);
+				var node = document.createElement(tag);
+				if (attrs) {
+					Object.keys(attrs).forEach(function (k) {
+						var v = attrs[k];
 						if (k === "class") node.className = v;
 						else if (k === "style") node.style.cssText = v;
 						else node.setAttribute(k, v);
 					});
-				children.flat().forEach((c) => {
+				}
+				children.forEach(function flatten(c) {
+					if (Array.isArray(c)) {
+						c.forEach(flatten);
+						return;
+					}
 					if (c == null) return;
 					node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
 				});
@@ -290,104 +669,962 @@
 			}
 
 			function hexToRgba(hex, alpha) {
-				const r = parseInt(hex.slice(1, 3), 16);
-				const g = parseInt(hex.slice(3, 5), 16);
-				const b = parseInt(hex.slice(5, 7), 16);
-				return `rgba(${r},${g},${b},${alpha})`;
+				var r = parseInt(hex.slice(1, 3), 16);
+				var g = parseInt(hex.slice(3, 5), 16);
+				var b = parseInt(hex.slice(5, 7), 16);
+				return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
 			}
 
-			function renderElement(e, accent) {
-				const block = el("div", { class: "el" });
+			function renderElement(e, accent, screenNum, elementIndex) {
+				var block = el("div", { class: "el" });
 				if (e.type === "Note" && accent) {
 					block.style.background = hexToRgba(accent, 0.07);
 					block.style.borderColor = hexToRgba(accent, 0.25);
 				}
-				const main = el("div", { class: "el-main" });
+				var main = el("div", { class: "el-main" });
 				main.appendChild(el("div", { class: "el-type" }, e.type));
 				if (e.content) main.appendChild(el("div", { class: "el-content" }, e.content));
 				block.appendChild(main);
 				if (e.fields) {
-					e.fields.forEach((f) => {
-						const row = el("div", { class: "el-field" });
+					e.fields.forEach(function (f) {
+						var row = el("div", { class: "el-field" });
 						row.appendChild(el("span", { class: "el-field-type" }, f.type));
 						row.appendChild(el("span", { class: "el-field-label" }, f.content));
 						block.appendChild(row);
 					});
 				}
-				Object.entries(e)
-					.filter(([k]) => k.startsWith("or:"))
-					.forEach(([k, v]) => {
-						const row = el("div", { class: "el-variant" });
+				Object.keys(e)
+					.filter(function (k) {
+						return k.indexOf("or:") === 0;
+					})
+					.forEach(function (k) {
+						var row = el("div", { class: "el-variant" });
 						row.appendChild(el("span", { class: "el-variant-key" }, k));
-						row.appendChild(el("span", { class: "el-variant-val" }, v));
+						row.appendChild(el("span", { class: "el-variant-val" }, e[k]));
 						block.appendChild(row);
 					});
 				if (e.note) block.appendChild(el("div", { class: "el-note" }, e.note));
+
+				// comment button (hover-revealed)
+				if (screenNum != null && elementIndex != null) {
+					var existingCount = BB.getElementComments(screenNum, elementIndex).length;
+					var commentBtn = el("button", {
+						class: "el-comment-btn" + (existingCount ? " has-comments" : ""),
+						title: "Comment on this element",
+					});
+					commentBtn.appendChild(makeSvgIcon(13));
+					if (accent) commentBtn.style.setProperty("--el-accent", accent);
+					commentBtn.addEventListener("click", function (ev) {
+						ev.stopPropagation();
+						BB.openSidebarElement(screenNum, elementIndex, e.type, e.content || "");
+					});
+					block.appendChild(commentBtn);
+				}
+
 				return block;
 			}
 
 			function renderScreen(screen, accent, groupName) {
-				const card = el("div", { class: "card", style: `--accent: ${accent}` });
+				var card = el("div", { class: "card", style: "--accent: " + accent, "data-screen-num": screen.num });
 
-				const header = el("div", { class: "card-header" });
+				var header = el("div", { class: "card-header" });
 				header.appendChild(el("div", { class: "card-num" }, screen.num));
 				header.appendChild(el("div", { class: "card-name" }, screen.name));
 				if (screen.group || groupName) {
 					header.appendChild(el("div", { class: "card-group" }, screen.group || groupName));
 				}
 				if (screen.jtbd) header.appendChild(el("div", { class: "card-jtbd" }, screen.jtbd));
-				const count = (screen.elements || []).length;
-				header.appendChild(el("div", { class: "card-expand" }, `${count} element${count !== 1 ? "s" : ""}`));
-				header.addEventListener("click", () => card.classList.toggle("card--expanded"));
+
+				// flows in header (always visible, even when collapsed)
+				if (screen.flows && screen.flows.length) {
+					var flowsEl = el("div", { class: "card-flows" });
+					screen.flows.forEach(function (f) {
+						flowsEl.appendChild(el("span", { class: "pill" }, f));
+					});
+					header.appendChild(flowsEl);
+				}
+
+				// comment button (doubles as count badge when comments present)
+				var commentBtn = el("button", {
+					class: "card-comment-btn",
+					title: "Comment on this card",
+					"data-screen-badge": screen.num,
+				});
+				commentBtn.appendChild(makeSvgIcon(15));
+				commentBtn.addEventListener("click", function (ev) {
+					ev.stopPropagation();
+					BB.openSidebarCard(screen.num, screen.name);
+				});
+				header.appendChild(commentBtn);
+
+				// expand toggle (label only — click on header triggers expand via drag layer)
+				var count = (screen.elements || []).length;
+				var expandEl = el("div", { class: "card-expand" }, count + " element" + (count !== 1 ? "s" : ""));
+				header.appendChild(expandEl);
+
 				card.appendChild(header);
 
-				const body = el("div", { class: "card-body" });
-				(screen.elements || []).forEach((e) => body.appendChild(renderElement(e, accent)));
+				var body = el("div", { class: "card-body" });
+				(screen.elements || []).forEach(function (e, i) {
+					body.appendChild(renderElement(e, accent, screen.num, i));
+				});
 				card.appendChild(body);
-
-				if (screen.flows && screen.flows.length) {
-					const footer = el("div", { class: "card-footer" });
-					screen.flows.forEach((f) => footer.appendChild(el("span", { class: "pill" }, f)));
-					card.appendChild(footer);
-				}
 
 				return card;
 			}
 
-			function renderGroup(group) {
-				const frag = document.createDocumentFragment();
+			function renderGroup(group, slug) {
+				var frag = document.createDocumentFragment();
 
-				const divider = el("div", { class: "group-header" });
+				var divider = el("div", { class: "group-header" });
 				divider.appendChild(el("span", { class: "group-name" }, group.name));
 				divider.appendChild(el("div", { class: "group-line" }));
 				frag.appendChild(divider);
 
-				const grid = el("div", { class: "grid" });
-				(group.screens || []).forEach((s) => grid.appendChild(renderScreen(s, group.accent, "")));
+				// record original order
+				BB.originalOrder[slug] = (group.screens || []).map(function (s) {
+					return s.num;
+				});
+
+				// apply stored reorder
+				var screens = group.screens || [];
+				if (BB.state.reorders[slug]) {
+					var order = BB.state.reorders[slug];
+					var map = {};
+					screens.forEach(function (s) {
+						map[s.num] = s;
+					});
+					screens = order
+						.map(function (num) {
+							return map[num];
+						})
+						.filter(Boolean);
+				}
+
+				var grid = el("div", { class: "grid", "data-group-slug": slug });
+				screens.forEach(function (s) {
+					var card = renderScreen(s, group.accent, "");
+					BB.initCardDrag(card, slug, grid);
+					grid.appendChild(card);
+				});
 				frag.appendChild(grid);
 
 				return frag;
 			}
 
 			function render(data) {
-				const root = document.getElementById("root");
+				var root = document.getElementById("root");
 
-				const header = el("div", { class: "page-header" });
+				var header = el("div", { class: "page-header" });
 				header.appendChild(el("div", { class: "page-title" }, data.product));
-				const meta = el("div", { class: "page-meta" });
-				const total = (data.groups || []).reduce((n, g) => n + (g.screens || []).length, 0);
-				meta.appendChild(el("span", {}, `${total} screens`));
-				if (data.date) meta.appendChild(el("span", {}, `Generated ${data.date}`));
+				var meta = el("div", { class: "page-meta" });
+				var total = (data.groups || []).reduce(function (n, g) {
+					return n + (g.screens || []).length;
+				}, 0);
+				meta.appendChild(el("span", {}, total + " screens"));
+				if (data.date) meta.appendChild(el("span", {}, "Generated " + data.date));
 				header.appendChild(meta);
 				root.appendChild(header);
 
-				(data.groups || []).forEach((g) => root.appendChild(renderGroup(g)));
+				(data.groups || []).forEach(function (g) {
+					root.appendChild(renderGroup(g, g._slug || ""));
+				});
 			}
 		</script>
 
 		<!-- ═══════════════════════════════════════════════════════
-     DATA — Claude writes breadboard-index.js + group files, never this file
-════════════════════════════════════════════════════════ -->
+		     INTERACTION LAYER — state · drag · comments · sidebar
+		════════════════════════════════════════════════════════ -->
+		<script>
+			var BB = (function () {
+				/* ──────────────────────────────────────
+				   STATE
+				────────────────────────────────────── */
+				var state = { reorders: {}, comments: {} };
+				var originalOrder = {};
+				var groupsData = [];
+
+				function storageKey() {
+					if (!window.BREADBOARD_META) return null;
+					var slug = BREADBOARD_META.product
+						.toLowerCase()
+						.replace(/\s+/g, "-")
+						.replace(/[^a-z0-9-]/g, "");
+					return "bb-feedback-" + slug + "-" + BREADBOARD_META.date;
+				}
+
+				function loadState() {
+					var key = storageKey();
+					if (!key) return;
+					try {
+						var raw = localStorage.getItem(key);
+						if (raw) {
+							var parsed = JSON.parse(raw);
+							if (parsed && typeof parsed === "object") {
+								// mutate in place so BB.state reference stays valid
+								state.reorders = parsed.reorders || {};
+								state.comments = parsed.comments || {};
+							}
+						}
+					} catch (e) {}
+				}
+
+				function saveState() {
+					var key = storageKey();
+					if (!key) return;
+					try {
+						localStorage.setItem(key, JSON.stringify(state));
+					} catch (e) {}
+				}
+
+				function clearAll() {
+					if (!confirm("Clear all reorders and comments? This cannot be undone.")) return;
+					// mutate in place so BB.state / BB.originalOrder references stay valid
+					state.reorders = {};
+					state.comments = {};
+					var key = storageKey();
+					if (key)
+						try {
+							localStorage.removeItem(key);
+						} catch (e) {}
+					Object.keys(originalOrder).forEach(function (k) {
+						delete originalOrder[k];
+					});
+					var root = document.getElementById("root");
+					root.innerHTML = "";
+					render({ product: BREADBOARD_META.product, date: BREADBOARD_META.date, groups: groupsData });
+					updateAllBadges();
+					updateBottomBar();
+					if (sidebar.open) renderSidebarContent();
+				}
+
+				/* ──────────────────────────────────────
+				   COMMENT HELPERS
+				────────────────────────────────────── */
+				function getCardComments(screenNum) {
+					return (state.comments[screenNum] && state.comments[screenNum].card) || [];
+				}
+
+				function getElementComments(screenNum, idx) {
+					var c = state.comments[screenNum];
+					if (!c || !c.elements || !c.elements[idx]) return [];
+					return c.elements[idx].comments || [];
+				}
+
+				function ensureScreen(screenNum, screenName) {
+					if (!state.comments[screenNum]) {
+						state.comments[screenNum] = { screenName: screenName || screenNum, card: [], elements: {} };
+					}
+					if (screenName) state.comments[screenNum].screenName = screenName;
+					if (!state.comments[screenNum].card) state.comments[screenNum].card = [];
+					if (!state.comments[screenNum].elements) state.comments[screenNum].elements = {};
+				}
+
+				function addCardComment(screenNum, screenName, text) {
+					text = text.trim();
+					if (!text) return;
+					ensureScreen(screenNum, screenName);
+					state.comments[screenNum].card.push(text);
+					saveState();
+					updateCardBadge(screenNum);
+					updateBottomBar();
+				}
+
+				function deleteCardComment(screenNum, index) {
+					var c = state.comments[screenNum];
+					if (!c || !c.card) return;
+					c.card.splice(index, 1);
+					saveState();
+					updateCardBadge(screenNum);
+					updateBottomBar();
+				}
+
+				function addElementComment(screenNum, idx, elType, elContent, text) {
+					text = text.trim();
+					if (!text) return;
+					ensureScreen(screenNum, null);
+					if (!state.comments[screenNum].elements[idx]) {
+						state.comments[screenNum].elements[idx] = { type: elType, content: elContent, comments: [] };
+					}
+					state.comments[screenNum].elements[idx].comments.push(text);
+					saveState();
+					updateCardBadge(screenNum);
+					updateElementBtn(screenNum, idx);
+					updateBottomBar();
+				}
+
+				function deleteElementComment(screenNum, idx, commentIndex) {
+					var els = state.comments[screenNum] && state.comments[screenNum].elements;
+					if (!els || !els[idx]) return;
+					els[idx].comments.splice(commentIndex, 1);
+					saveState();
+					updateCardBadge(screenNum);
+					updateElementBtn(screenNum, idx);
+					updateBottomBar();
+				}
+
+				/* ──────────────────────────────────────
+				   BADGE / BUTTON SYNC
+				────────────────────────────────────── */
+				function getScreenCommentCount(screenNum) {
+					var c = state.comments[screenNum];
+					if (!c) return 0;
+					var n = (c.card || []).length;
+					if (c.elements)
+						Object.keys(c.elements).forEach(function (k) {
+							n += (c.elements[k].comments || []).length;
+						});
+					return n;
+				}
+
+				function updateCardBadge(screenNum) {
+					var btn = document.querySelector('[data-screen-badge="' + screenNum + '"]');
+					if (!btn) return;
+					var count = getScreenCommentCount(screenNum);
+					btn.innerHTML = "";
+					if (count > 0) {
+						btn.appendChild(document.createTextNode(count));
+						btn.classList.add("has-comments");
+					} else {
+						btn.appendChild(makeSvgIcon(15));
+						btn.classList.remove("has-comments");
+					}
+				}
+
+				function updateElementBtn(screenNum, idx) {
+					var card = document.querySelector('[data-screen-num="' + screenNum + '"]');
+					if (!card) return;
+					var els = card.querySelectorAll(".el");
+					var elBlock = els[idx];
+					if (!elBlock) return;
+					var btn = elBlock.querySelector(".el-comment-btn");
+					if (!btn) return;
+					var count = getElementComments(screenNum, idx).length;
+					btn.innerHTML = "";
+					if (count > 0) {
+						btn.appendChild(document.createTextNode(count));
+						btn.classList.add("has-comments");
+					} else {
+						btn.appendChild(makeSvgIcon(13));
+						btn.classList.remove("has-comments");
+					}
+				}
+
+				function updateAllBadges() {
+					Object.keys(state.comments).forEach(function (screenNum) {
+						updateCardBadge(screenNum);
+						var c = state.comments[screenNum];
+						if (c && c.elements) {
+							Object.keys(c.elements).forEach(function (idx) {
+								updateElementBtn(screenNum, parseInt(idx, 10));
+							});
+						}
+					});
+				}
+
+				/* ──────────────────────────────────────
+				   BOTTOM BAR
+				────────────────────────────────────── */
+				function updateBottomBar() {
+					var reorderCount = Object.keys(state.reorders).length;
+					var commentCount = 0;
+					Object.keys(state.comments).forEach(function (k) {
+						commentCount += getScreenCommentCount(k);
+					});
+					var el = document.getElementById("bb-bar-counts");
+					if (el)
+						el.textContent =
+							reorderCount +
+							" reorder" +
+							(reorderCount !== 1 ? "s" : "") +
+							" · " +
+							commentCount +
+							" comment" +
+							(commentCount !== 1 ? "s" : "");
+				}
+
+				/* ──────────────────────────────────────
+				   COPY FEEDBACK
+				────────────────────────────────────── */
+				function copyFeedback() {
+					var json = {
+						product: BREADBOARD_META ? BREADBOARD_META.product : "",
+						breadboardDate: BREADBOARD_META ? BREADBOARD_META.date : "",
+						feedbackDate: new Date().toISOString().slice(0, 10),
+						reorders: {},
+						comments: {},
+					};
+
+					Object.keys(state.reorders).forEach(function (slug) {
+						var g = window["BREADBOARD_GROUP_" + slug.replace(/-/g, "_")];
+						json.reorders[slug] = { name: g ? g.name : slug, screens: state.reorders[slug] };
+					});
+
+					Object.keys(state.comments).forEach(function (screenNum) {
+						var c = state.comments[screenNum];
+						var cardLen = (c.card || []).length;
+						var elLen = c.elements
+							? Object.keys(c.elements).reduce(function (n, k) {
+									return n + (c.elements[k].comments || []).length;
+								}, 0)
+							: 0;
+						if (!cardLen && !elLen) return;
+						var out = { screenName: c.screenName || screenNum, card: c.card || [], elements: {} };
+						if (c.elements) {
+							Object.keys(c.elements).forEach(function (idx) {
+								var e = c.elements[idx];
+								if (e.comments && e.comments.length) {
+									out.elements[idx] = { type: e.type, content: e.content, comments: e.comments };
+								}
+							});
+						}
+						json.comments[screenNum] = out;
+					});
+
+					var text = JSON.stringify(json, null, 2);
+					var btn = document.getElementById("bb-copy-btn");
+
+					function flash() {
+						if (!btn) return;
+						var orig = btn.textContent;
+						btn.textContent = "Copied ✓";
+						setTimeout(function () {
+							btn.textContent = orig;
+						}, 1500);
+					}
+
+					if (navigator.clipboard && navigator.clipboard.writeText) {
+						navigator.clipboard
+							.writeText(text)
+							.then(flash)
+							.catch(function () {
+								fallbackCopy(text, flash);
+							});
+					} else {
+						fallbackCopy(text, flash);
+					}
+				}
+
+				function fallbackCopy(text, cb) {
+					var ta = document.createElement("textarea");
+					ta.value = text;
+					ta.style.cssText = "position:fixed;top:-9999px;opacity:0";
+					document.body.appendChild(ta);
+					ta.select();
+					try {
+						document.execCommand("copy");
+					} catch (e) {}
+					document.body.removeChild(ta);
+					if (cb) cb();
+				}
+
+				/* ──────────────────────────────────────
+				   DRAG AND DROP
+				────────────────────────────────────── */
+				var drag = {
+					active: false,
+					card: null,
+					ghost: null,
+					groupSlug: null,
+					groupGrid: null,
+					groupCards: null,
+					startX: 0,
+					startY: 0,
+					offsetX: 0,
+					offsetY: 0,
+					pointerId: null,
+					lastInsertionKey: null,
+				};
+				var DRAG_THRESHOLD = 6;
+
+				function initCardDrag(card, groupSlug, groupGrid) {
+					card.addEventListener("pointerdown", function (e) {
+						if (e.button !== 0) return;
+						if (e.target.closest("button")) return;
+
+						drag.card = card;
+						drag.groupSlug = groupSlug;
+						drag.groupGrid = groupGrid;
+						drag.startX = e.clientX;
+						drag.startY = e.clientY;
+						drag.pointerId = e.pointerId;
+						drag.active = false;
+						drag.lastInsertionKey = null;
+
+						var rect = card.getBoundingClientRect();
+						drag.offsetX = e.clientX - rect.left;
+						drag.offsetY = e.clientY - rect.top;
+
+						document.addEventListener("pointermove", onDragMove);
+						document.addEventListener("pointerup", onDragEnd);
+						document.addEventListener("pointercancel", onDragCancel);
+						document.addEventListener("keydown", onDragKeydown);
+					});
+				}
+
+				function onDragMove(e) {
+					if (!drag.card || e.pointerId !== drag.pointerId) return;
+					var dx = e.clientX - drag.startX;
+					var dy = e.clientY - drag.startY;
+
+					if (!drag.active) {
+						if (Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD) return;
+						startDrag(e);
+					}
+
+					if (drag.ghost) {
+						drag.ghost.style.left = e.clientX - drag.offsetX + "px";
+						drag.ghost.style.top = e.clientY - drag.offsetY + "px";
+					}
+					updateDropIndicator(e.clientX, e.clientY);
+				}
+
+				function startDrag(e) {
+					drag.active = true;
+
+					var ghost = drag.card.cloneNode(true);
+					ghost.classList.remove("card--expanded");
+					ghost.style.cssText =
+						"position:fixed;pointer-events:none;z-index:9999;" +
+						"width:" +
+						drag.card.offsetWidth +
+						"px;" +
+						"opacity:0.92;transform:scale(1.03) rotate(1.2deg);" +
+						"box-shadow:0 12px 32px rgba(0,0,0,0.18);transition:none;" +
+						"left:" +
+						(e.clientX - drag.offsetX) +
+						"px;" +
+						"top:" +
+						(e.clientY - drag.offsetY) +
+						"px;";
+					document.body.appendChild(ghost);
+					drag.ghost = ghost;
+
+					drag.card.classList.add("card--dragging");
+
+					drag.groupCards = Array.from(drag.groupGrid.querySelectorAll(".card")).filter(function (c) {
+						return c !== drag.card;
+					});
+				}
+
+				function updateDropIndicator(cx, cy) {
+					if (!drag.groupCards || !drag.groupCards.length) return;
+
+					// Find closest sibling card
+					var best = null,
+						bestDist = Infinity;
+					drag.groupCards.forEach(function (c) {
+						var r = c.getBoundingClientRect();
+						var ccx = r.left + r.width / 2;
+						var ccy = r.top + r.height / 2;
+						var dist = Math.sqrt((cx - ccx) * (cx - ccx) + (cy - ccy) * (cy - ccy));
+						if (dist < bestDist) {
+							bestDist = dist;
+							best = c;
+						}
+					});
+
+					if (!best) return;
+
+					var r = best.getBoundingClientRect();
+					var isBefore = cx < r.left + r.width / 2;
+					var key = best.dataset.screenNum + (isBefore ? ":before" : ":after");
+
+					// Debounce: only move DOM if insertion point changed
+					if (key === drag.lastInsertionKey) return;
+					drag.lastInsertionKey = key;
+
+					// Move the dragging card (acts as a live placeholder) to new slot
+					if (isBefore) {
+						if (drag.card.nextSibling !== best) {
+							drag.groupGrid.insertBefore(drag.card, best);
+						}
+					} else {
+						var refNode = best.nextSibling;
+						if (refNode !== drag.card) {
+							if (refNode) drag.groupGrid.insertBefore(drag.card, refNode);
+							else drag.groupGrid.appendChild(drag.card);
+						}
+					}
+				}
+
+				function onDragEnd(e) {
+					if (!drag.card || e.pointerId !== drag.pointerId) return;
+					finishDrag();
+				}
+				function onDragCancel(e) {
+					if (!drag.card || e.pointerId !== drag.pointerId) return;
+					cancelDrag();
+				}
+				function onDragKeydown(e) {
+					if (e.key === "Escape" && drag.active) cancelDrag();
+				}
+
+				function finishDrag() {
+					if (!drag.active) {
+						// tap without movement — toggle expand
+						drag.card.classList.toggle("card--expanded");
+						cleanupDrag();
+						return;
+					}
+
+					if (drag.ghost) {
+						drag.ghost.remove();
+						drag.ghost = null;
+					}
+
+					// Card is already in its new DOM position — just restore styling
+					drag.card.classList.remove("card--dragging");
+
+					// Record order from current DOM state
+					var newOrder = Array.from(drag.groupGrid.querySelectorAll(".card")).map(function (c) {
+						return c.dataset.screenNum;
+					});
+					var orig = originalOrder[drag.groupSlug];
+					var changed =
+						!orig ||
+						newOrder.some(function (n, i) {
+							return n !== orig[i];
+						});
+
+					if (changed) {
+						state.reorders[drag.groupSlug] = newOrder;
+					} else {
+						delete state.reorders[drag.groupSlug];
+					}
+					saveState();
+					updateBottomBar();
+
+					cleanupDrag();
+				}
+
+				function cancelDrag() {
+					if (drag.ghost) {
+						drag.ghost.remove();
+						drag.ghost = null;
+					}
+					if (drag.card) drag.card.classList.remove("card--dragging");
+					cleanupDrag();
+				}
+
+				function cleanupDrag() {
+					document.removeEventListener("pointermove", onDragMove);
+					document.removeEventListener("pointerup", onDragEnd);
+					document.removeEventListener("pointercancel", onDragCancel);
+					document.removeEventListener("keydown", onDragKeydown);
+					drag.active = false;
+					drag.card = null;
+					drag.ghost = null;
+					drag.groupSlug = null;
+					drag.groupGrid = null;
+					drag.groupCards = null;
+					drag.lastInsertionKey = null;
+				}
+
+				/* ──────────────────────────────────────
+				   SIDEBAR
+				────────────────────────────────────── */
+				var sidebar = {
+					open: false,
+					tab: "all",
+					focusType: null, // "card" | "element"
+					focusScreenNum: null,
+					focusScreenName: null,
+					focusElementIndex: null,
+					focusElementType: null,
+					focusElementContent: null,
+				};
+
+				function openSidebarCard(screenNum, screenName) {
+					sidebar.focusType = "card";
+					sidebar.focusScreenNum = screenNum;
+					sidebar.focusScreenName = screenName;
+					sidebar.focusElementIndex = null;
+					openSidebar("selected");
+				}
+
+				function openSidebarElement(screenNum, idx, elType, elContent) {
+					sidebar.focusType = "element";
+					sidebar.focusScreenNum = screenNum;
+					sidebar.focusElementIndex = idx;
+					sidebar.focusElementType = elType;
+					sidebar.focusElementContent = elContent;
+					// try to get screenName from state
+					sidebar.focusScreenName = state.comments[screenNum] ? state.comments[screenNum].screenName : screenNum;
+					openSidebar("selected");
+				}
+
+				function openSidebarAll() {
+					openSidebar("all");
+				}
+
+				function openSidebar(tab) {
+					sidebar.open = true;
+					sidebar.tab = tab || sidebar.tab;
+					document.getElementById("bb-sidebar").classList.add("bb-sidebar--open");
+					setSidebarTab(sidebar.tab);
+				}
+
+				function closeSidebar() {
+					sidebar.open = false;
+					document.getElementById("bb-sidebar").classList.remove("bb-sidebar--open");
+				}
+
+				function setSidebarTab(tab) {
+					sidebar.tab = tab;
+					document.getElementById("bb-tab-all").classList.toggle("bb-tab--active", tab === "all");
+					document.getElementById("bb-tab-selected").classList.toggle("bb-tab--active", tab === "selected");
+					renderSidebarContent();
+				}
+
+				function renderSidebarContent() {
+					var body = document.getElementById("bb-sidebar-body");
+					body.innerHTML = "";
+					if (sidebar.tab === "all") renderSidebarAll(body);
+					else renderSidebarSelected(body);
+				}
+
+				function makeCommentRow(text, onDelete) {
+					var row = document.createElement("div");
+					row.className = "bb-comment-row";
+					var span = document.createElement("span");
+					span.className = "bb-comment-text";
+					span.textContent = text;
+					var btn = document.createElement("button");
+					btn.className = "bb-comment-del";
+					btn.textContent = "×";
+					btn.title = "Delete";
+					btn.addEventListener("click", onDelete);
+					row.appendChild(span);
+					row.appendChild(btn);
+					return row;
+				}
+
+				function makeCommentInput(onAdd) {
+					var wrap = document.createElement("div");
+					wrap.className = "bb-comment-input-wrap";
+					var ta = document.createElement("textarea");
+					ta.className = "bb-comment-textarea";
+					ta.placeholder = "Add a comment…";
+					ta.rows = 2;
+					var btn = document.createElement("button");
+					btn.className = "bb-comment-add-btn";
+					btn.textContent = "Add";
+					btn.disabled = true;
+					ta.addEventListener("input", function () {
+						btn.disabled = ta.value.trim() === "";
+					});
+					ta.addEventListener("keydown", function (e) {
+						if (e.key === "Enter" && !e.shiftKey) {
+							e.preventDefault();
+							if (!btn.disabled) btn.click();
+						}
+					});
+					btn.addEventListener("click", function () {
+						var text = ta.value.trim();
+						if (!text) return;
+						onAdd(text);
+						ta.value = "";
+						btn.disabled = true;
+					});
+					wrap.appendChild(ta);
+					wrap.appendChild(btn);
+					// focus after paint
+					setTimeout(function () {
+						ta.focus();
+					}, 40);
+					return wrap;
+				}
+
+				function renderSidebarAll(body) {
+					var hasAny = false;
+
+					Object.keys(state.comments).forEach(function (screenNum) {
+						var c = state.comments[screenNum];
+						var total = getScreenCommentCount(screenNum);
+						if (!total) return;
+						hasAny = true;
+
+						var section = document.createElement("div");
+						section.className = "bb-comment-section";
+
+						var screenHeader = document.createElement("div");
+						screenHeader.className = "bb-comment-screen-header";
+						screenHeader.textContent = (c.screenName || screenNum) + "  " + screenNum;
+						section.appendChild(screenHeader);
+
+						// card-level
+						if (c.card && c.card.length) {
+							var lbl = document.createElement("div");
+							lbl.className = "bb-comment-target-label";
+							lbl.textContent = "Card";
+							section.appendChild(lbl);
+							c.card.forEach(function (text, i) {
+								section.appendChild(
+									makeCommentRow(
+										text,
+										(function (ci) {
+											return function () {
+												deleteCardComment(screenNum, ci);
+												renderSidebarContent();
+											};
+										})(i),
+									),
+								);
+							});
+						}
+
+						// element-level
+						if (c.elements) {
+							Object.keys(c.elements)
+								.sort(function (a, b) {
+									return a - b;
+								})
+								.forEach(function (idx) {
+									var e = c.elements[idx];
+									if (!e.comments || !e.comments.length) return;
+									var lbl = document.createElement("div");
+									lbl.className = "bb-comment-target-label";
+									lbl.textContent = e.type + (e.content ? " – " + e.content.slice(0, 28) : "");
+									section.appendChild(lbl);
+									e.comments.forEach(function (text, ci) {
+										section.appendChild(
+											makeCommentRow(
+												text,
+												(function (capturedIdx, capturedCi) {
+													return function () {
+														deleteElementComment(screenNum, capturedIdx, capturedCi);
+														renderSidebarContent();
+													};
+												})(idx, ci),
+											),
+										);
+									});
+								});
+						}
+
+						body.appendChild(section);
+					});
+
+					if (!hasAny) {
+						var empty = document.createElement("div");
+						empty.className = "bb-sidebar-empty";
+						empty.textContent = "No comments yet.\nHover a card or element and click ✉ to add one.";
+						body.appendChild(empty);
+					}
+				}
+
+				function renderSidebarSelected(body) {
+					if (!sidebar.focusType) {
+						var empty = document.createElement("div");
+						empty.className = "bb-sidebar-empty";
+						empty.textContent = "Hover a card or element and click ✉ to comment on it.";
+						body.appendChild(empty);
+						return;
+					}
+
+					var section = document.createElement("div");
+					section.className = "bb-comment-section";
+
+					var screenNum = sidebar.focusScreenNum;
+					var isCard = sidebar.focusType === "card";
+
+					// focus label
+					var focusLbl = document.createElement("div");
+					focusLbl.className = "bb-comment-focus-label";
+					if (isCard) {
+						focusLbl.textContent = (sidebar.focusScreenName || screenNum) + " · Card";
+					} else {
+						var elDesc = sidebar.focusElementType;
+						if (sidebar.focusElementContent) elDesc += " – " + sidebar.focusElementContent.slice(0, 28);
+						focusLbl.textContent = (sidebar.focusScreenName || screenNum) + " · " + elDesc;
+					}
+					section.appendChild(focusLbl);
+
+					// existing comments
+					if (isCard) {
+						getCardComments(screenNum).forEach(function (text, i) {
+							section.appendChild(
+								makeCommentRow(
+									text,
+									(function (ci) {
+										return function () {
+											deleteCardComment(screenNum, ci);
+											renderSidebarContent();
+										};
+									})(i),
+								),
+							);
+						});
+					} else {
+						var idx = sidebar.focusElementIndex;
+						getElementComments(screenNum, idx).forEach(function (text, ci) {
+							section.appendChild(
+								makeCommentRow(
+									text,
+									(function (capturedCi) {
+										return function () {
+											deleteElementComment(screenNum, idx, capturedCi);
+											renderSidebarContent();
+										};
+									})(ci),
+								),
+							);
+						});
+					}
+
+					// input
+					section.appendChild(
+						makeCommentInput(function (text) {
+							if (isCard) {
+								addCardComment(screenNum, sidebar.focusScreenName || screenNum, text);
+							} else {
+								addElementComment(
+									screenNum,
+									sidebar.focusElementIndex,
+									sidebar.focusElementType,
+									sidebar.focusElementContent,
+									text,
+								);
+							}
+							renderSidebarContent();
+						}),
+					);
+
+					body.appendChild(section);
+				}
+
+				/* ──────────────────────────────────────
+				   PUBLIC API
+				────────────────────────────────────── */
+				return {
+					state: state,
+					originalOrder: originalOrder,
+					loadState: loadState,
+					saveState: saveState,
+					clearAll: clearAll,
+					getCardComments: getCardComments,
+					getElementComments: getElementComments,
+					initCardDrag: initCardDrag,
+					updateAllBadges: updateAllBadges,
+					updateBottomBar: updateBottomBar,
+					copyFeedback: copyFeedback,
+					openSidebarCard: openSidebarCard,
+					openSidebarElement: openSidebarElement,
+					openSidebarAll: openSidebarAll,
+					closeSidebar: closeSidebar,
+					setSidebarTab: setSidebarTab,
+					renderSidebarContent: renderSidebarContent,
+					setGroupsData: function (d) {
+						groupsData = d;
+					},
+				};
+			})();
+		</script>
+
+		<!-- ═══════════════════════════════════════════════════════
+		     DATA — Claude writes breadboard-index.js + group files, never this file
+		════════════════════════════════════════════════════════ -->
 		<script src="./breadboard-index.js"></script>
 		<script>
 			(function () {
@@ -396,35 +1633,47 @@
 						"<p style='font-family:sans-serif;padding:2rem;color:#ef4444'>Missing <code>breadboard-index.js</code> — run <code>/lyra-breadboard</code> to generate it.</p>";
 					return;
 				}
+
+				BB.loadState();
+
 				var slugs = window.BREADBOARD_GROUP_ORDER || [];
 				if (!slugs.length) {
-					render({ ...window.BREADBOARD_META, groups: [] });
+					render({ product: BREADBOARD_META.product, date: BREADBOARD_META.date, groups: [] });
+					BB.updateBottomBar();
 					return;
 				}
+
 				var done = 0;
 				slugs.forEach(function (slug) {
 					if (!/^[a-z0-9-]+$/.test(slug)) {
-						if (++done === slugs.length) render({ ...window.BREADBOARD_META, groups: [] });
+						if (++done === slugs.length) finalize([]);
 						return;
 					}
 					var s = document.createElement("script");
 					s.src = "./breadboard-group-" + slug + ".js";
 					function finish() {
 						if (++done === slugs.length) {
-							render({
-								...window.BREADBOARD_META,
-								groups: slugs
-									.map(function (sl) {
-										return window["BREADBOARD_GROUP_" + sl.replace(/-/g, "_")];
-									})
-									.filter(Boolean),
-							});
+							var groups = slugs
+								.map(function (sl) {
+									var g = window["BREADBOARD_GROUP_" + sl.replace(/-/g, "_")];
+									if (g) g._slug = sl;
+									return g;
+								})
+								.filter(Boolean);
+							finalize(groups);
 						}
 					}
 					s.onload = finish;
 					s.onerror = finish;
 					document.head.appendChild(s);
 				});
+
+				function finalize(groups) {
+					BB.setGroupsData(groups);
+					render({ product: BREADBOARD_META.product, date: BREADBOARD_META.date, groups: groups });
+					BB.updateAllBadges();
+					BB.updateBottomBar();
+				}
 			})();
 		</script>
 	</body>
