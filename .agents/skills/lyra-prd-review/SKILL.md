@@ -42,14 +42,28 @@ output.
 
 ### Ticket ID provided
 
-Fetch the Jira epic using the Jira MCP. Retrieve the full ticket including:
+Fetch the Jira epic using the Atlassian Connector. Retrieve the full ticket including:
 
 - Title, description
 - Attachments (sequence diagrams, architecture docs)
 - Labels, components, linked tickets
 - ISMS considerations section (if present)
 
-If the Jira MCP is unavailable, tell the user and ask them to paste the PRD content directly.
+If the Atlassian Connector is unavailable, tell the user and ask them to paste the PRD content directly.
+
+### URL extraction pass (mandatory)
+
+After fetching the ticket, make a deliberate pass over the raw description and all attachment metadata. Extract **every URL**
+present — including Smart Links, embedded Confluence pages, Whimsical diagrams, architecture docs, and API references. For
+each URL:
+
+1. Attempt to fetch it.
+2. Record the result (fetched / inaccessible / blank) in the Sources Consulted table.
+3. If the content is a diagram or architecture doc, note key facts that affect the technical audit.
+
+Do not skip URLs because they appear to be supplementary — attachments frequently contain the authoritative sequence
+diagrams, data flows, or API contracts that the PRD body summarises. A blank or inaccessible result is itself a finding: note
+it in the report.
 
 ### No Ticket ID provided
 
@@ -141,10 +155,22 @@ audit should resolve, confirm, or escalate each one.
 
 ### 5a. Architecture audit
 
-- Identify every service, API, queue, and data store mentioned or implied by the PRD.
-- For each component, ask: does existing code already solve this sub-problem? Prefer capturing outputs from existing flows
-  over building parallel ones.
-- If the PRD includes attachments with sequence or architecture diagrams, fetch and review them. Flag correctness issues.
+Produce an explicit checklist of every service, API, queue, and data store mentioned or implied by the PRD. Use this format:
+
+```
+Services to audit:
+- [ ] <service-name> — reason it is in scope (e.g. "named in PRD", "implied by Kafka topic X", "owns membership state")
+- [ ] ...
+```
+
+Every item on this list must be checked in Step 5b — do not silently skip a service because it seems secondary. If you cannot
+access a service, note it explicitly in the report. Do not narrow scope to the "primary" backend service.
+
+For each component, ask: does existing code already solve this sub-problem? Prefer capturing outputs from existing flows over
+building parallel ones.
+
+If the PRD includes attachments with sequence or architecture diagrams, fetch and review them (see Step 1 URL extraction).
+Flag correctness issues.
 
 ### 5b. Codebase audit (only if monorepo is accessible)
 
@@ -173,7 +199,7 @@ possible.
 
 **If mounted via `/dab` (direct mount):** Local grep is fine — no SSH needed.
 
-For each relevant service named in the PRD, check the current state before reviewing:
+**Iterate through every service on the Step 5a checklist.** For each service:
 
 ```bash
 ssh vm 'git -C ~/dab/<service> log --oneline -1'
@@ -229,18 +255,19 @@ this structure:
 ...
 ```
 
-| Area                                   | What to look for                                                                                                                                                                                                                                      |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Architectural fit**                  | Does this follow established patterns, or introduce a "special snowflake" that future engineers won't understand?                                                                                                                                     |
-| **Essential vs accidental complexity** | Is this solving a real problem, or one we created? Before adding anything: would removing it break the user outcome?                                                                                                                                  |
-| **Reversibility**                      | Are feature flags, A/B tests, or incremental rollout specified? Make the cost of being wrong low.                                                                                                                                                     |
-| **Scalability**                        | How does this behave at 10x load? When data grows from MB to TB?                                                                                                                                                                                      |
-| **Observability**                      | Are logging, alerting, and tracing requirements specified? Can the on-call engineer diagnose a failure at 3am without an archaeology session?                                                                                                         |
-| **Security & Compliance**              | Are data handling, encryption, and PII requirements explicitly stated and legally sound? Does the implementation close the ISMS gaps identified in Step 4? A deactivation or offboarding gap is not a scope question — it is a compliance obligation. |
-| **Failure modes**                      | What does the user experience when a dependency goes offline? Is graceful degradation defined?                                                                                                                                                        |
-| **Abstraction**                        | Does the PRD define data access patterns (the "what") rather than specific database choices (the "how")?                                                                                                                                              |
-| **Risks**                              | Are stated risks valid and complete? What risks are absent?                                                                                                                                                                                           |
-| **Open questions**                     | What must be resolved before implementation begins?                                                                                                                                                                                                   |
+| Area                                   | What to look for                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Architectural fit**                  | Does this follow established patterns, or introduce a "special snowflake" that future engineers won't understand?                                                                                                                                                                                                                                                                                                                |
+| **Essential vs accidental complexity** | Is this solving a real problem, or one we created? Before adding anything: would removing it break the user outcome?                                                                                                                                                                                                                                                                                                             |
+| **Reversibility**                      | Are feature flags, A/B tests, or incremental rollout specified? Make the cost of being wrong low.                                                                                                                                                                                                                                                                                                                                |
+| **Scalability**                        | How does this behave at 10x load? When data grows from MB to TB?                                                                                                                                                                                                                                                                                                                                                                 |
+| **Observability**                      | Are logging, alerting, and tracing requirements specified? Can the on-call engineer diagnose a failure at 3am without an archaeology session?                                                                                                                                                                                                                                                                                    |
+| **Security & Compliance**              | Are data handling, encryption, and PII requirements explicitly stated and legally sound? Does the implementation close the ISMS gaps identified in Step 4? A deactivation or offboarding gap is not a scope question — it is a compliance obligation.                                                                                                                                                                            |
+| **Eligibility specification**          | Any feature gated on membership tier, subscription state, role, or cohort must name the exact tier/state required. Search the relevant service for existing tier/level enumerations and branching (e.g. `MembershipTier`, `GroupPremium`). If the PRD says "active subscriber" without naming the tier, that is a BLOCKER — the codebase may already branch on tier and the new feature must specify which branch it belongs to. |
+| **Failure modes**                      | For each external dependency (third-party or cross-service) identified in 5a, write a named failure scenario: "When `<dependency>` is unavailable or times out: `<what does the user see? what does the system do?>`". Any unspecified scenario is at minimum a RISK. A timeout that leaves the user mid-flow with no defined fallback is a BLOCKER. Do not collapse multiple failure modes into a single generic observation.   |
+| **Abstraction**                        | Does the PRD define data access patterns (the "what") rather than specific database choices (the "how")?                                                                                                                                                                                                                                                                                                                         |
+| **Risks**                              | Are stated risks valid and complete? What risks are absent?                                                                                                                                                                                                                                                                                                                                                                      |
+| **Open questions**                     | What must be resolved before implementation begins?                                                                                                                                                                                                                                                                                                                                                                              |
 
 ### 5e. Stakeholder adversarial review
 
