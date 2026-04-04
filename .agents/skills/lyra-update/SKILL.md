@@ -1,8 +1,6 @@
 ---
 name: lyra-update
-description:
-  Update the Lyra skill library — pulls latest from git and re-symlinks any new skills. Use when you want to get the latest
-  skill updates, or when prompted by a SKILLS_UPDATE_AVAILABLE notice.
+description: Updates the Lyra skill library from git. Invoke with /lyra-update.
 allowed-tools:
   - Bash
 metadata:

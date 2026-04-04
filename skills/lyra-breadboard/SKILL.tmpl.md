@@ -1,12 +1,6 @@
 ---
 name: lyra-breadboard
-description: >
-  Breadboarding — turns a vague app idea into a lightweight structural wireframe. Use this skill whenever the user wants to
-  map out a new product, SaaS, feature set, or app idea before any design or engineering begins. Trigger on phrases like
-  "help me build a SaaS", "map out my app idea", "create a sitemap", "plan a new feature", "breadboard this", "wireframe the
-  flow", or any time someone describes an app concept and wants to understand the screens and user flow. Also trigger when a
-  user shares a business idea and asks "where do I start" or "what are the screens". The output is a browser-ready HTML
-  artifact — a handoff-ready breadboard for designers and engineers to work from in parallel.
+description: Turns an app idea into a structural screen flow. Invoke with /lyra-breadboard.
 metadata:
   version: 1.0.0
 ---
