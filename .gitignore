@@ -16,3 +16,4 @@ credentials.json
 
 # Temp files from deploy script
 *.tmp
+.superpowers/
