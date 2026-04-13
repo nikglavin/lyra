@@ -69,7 +69,7 @@ bun run build
 ```
 skills/
   my-skill/
-    SKILL.md          # skill prompt (or SKILL.md.tmpl for shared includes)
+    SKILL.md          # skill prompt (or SKILL.tmpl.md for shared includes)
     scripts/          # any scripts the skill references
 ```
 
