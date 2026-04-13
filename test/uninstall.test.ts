@@ -130,3 +130,30 @@ test("uninstall leaves a real shared/scripts directory alone", () => {
 		rmSync(fakeHome, { recursive: true });
 	}
 });
+
+test("uninstall is idempotent — second run is a clean no-op", () => {
+	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
+	try {
+		runInstall(fakeHome);
+		runUninstall(fakeHome);
+		const second = runUninstall(fakeHome);
+		expect(second).toMatch(/Done\. 0 link\(s\) removed, 0 skipped/);
+	} finally {
+		rmSync(fakeHome, { recursive: true });
+	}
+});
+
+test("uninstall SKIP messages never use a literal tilde", () => {
+	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
+	try {
+		mkdirSync(join(fakeHome, ".claude/skills/lyra-breadboard"), { recursive: true });
+		mkdirSync(join(fakeHome, ".claude/shared/scripts"), { recursive: true });
+
+		const output = runUninstall(fakeHome);
+		expect(output).not.toContain("~/.claude/skills");
+		expect(output).not.toContain("~/.claude/shared");
+		expect(output).toContain(fakeHome);
+	} finally {
+		rmSync(fakeHome, { recursive: true });
+	}
+});
