@@ -143,6 +143,28 @@ test("uninstall is idempotent — second run is a clean no-op", () => {
 	}
 });
 
+test("uninstall rejects unknown arguments with exit code 2", () => {
+	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
+	try {
+		let exitCode = 0;
+		let output = "";
+		try {
+			output = execSync(`HOME="${fakeHome}" bash "${UNINSTALL_SCRIPT}" --purge 2>&1`, {
+				cwd: REPO_ROOT,
+				encoding: "utf8",
+			});
+		} catch (err: unknown) {
+			const e = err as { status: number; stdout: Buffer; stderr: Buffer };
+			exitCode = e.status;
+			output = (e.stdout?.toString() ?? "") + (e.stderr?.toString() ?? "");
+		}
+		expect(exitCode).toBe(2);
+		expect(output).toContain("uninstall takes no arguments");
+	} finally {
+		rmSync(fakeHome, { recursive: true });
+	}
+});
+
 test("uninstall SKIP messages never use a literal tilde", () => {
 	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
 	try {
