@@ -1,5 +1,3 @@
-## AI Slop Checklist
-
 Walk this checklist during the design audit phase. Each positive match is a finding tagged `slop:<pattern-id>` with default
 severity **Medium** unless context makes it worse (e.g. lorem ipsum in a production checkout flow is Critical, not Medium).
 

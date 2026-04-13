@@ -44,8 +44,6 @@ or AI-generated-looking interfaces. Test with a browser, fix in source code, com
 
 ## Phase 1: Plan context discovery
 
-## Plan Context Discovery
-
 Before doing anything else, scan the project for plan and spec documents. These are created by planning tools (e.g.
 superpowers, /plan, /spec) and contain feature scope, acceptance criteria, and user flows — exactly what you need to focus
 your QA or design review.
@@ -123,8 +121,12 @@ Options (dynamically built from discovered files, plus always include):
    Acceptance criteria: [count] items
    Known risks: [list or "none flagged"]
    ```
-4. Use this context throughout the session: prioritize testing documented user flows, map acceptance criteria directly to
-   test cases, note passes vs. failures in the final report.
+4. Use this context throughout the session:
+   - Prioritize testing the documented user flows over generic exploration.
+   - Map each acceptance criterion directly to a test case or audit check.
+   - Note each acceptance criterion as **pass** or **fail** in the final report.
+   - Add a dedicated **"Acceptance Criteria Coverage"** section to the final report listing every criterion with its pass /
+     fail status, so downstream readers (PR reviewers, next-session planners) can scan it without re-reading the plan.
 
 **If the user selects "No plan":** print
 `Running general session — no feature plan loaded. Testing will cover the full application.` and continue.
@@ -135,8 +137,6 @@ Options (dynamically built from discovered files, plus always include):
 ---
 
 ## Phase 2: Prior learnings
-
-## Prior Learnings
 
 Before running the main work, load knowledge from previous sessions on this project. Past runs may have discovered
 non-obvious quirks — custom ports, flaky animations, auth session timeouts, build order dependencies — that would waste time
@@ -227,8 +227,6 @@ fi
 
 ## Phase 4: Clean working tree gate
 
-## Clean Working Tree Gate
-
 Before any phase that will produce commits, confirm the working tree is clean.
 
 ```bash
@@ -286,8 +284,6 @@ scale, color palette). No automatic writes without user consent.
 ---
 
 ## Phase 6: Browser primitives reference
-
-## Browser Primitives (Playwright MCP)
 
 All browser interactions go through the Playwright MCP server. Tool names follow the pattern
 `mcp__plugin_playwright_playwright__<action>`. Use this table as a reference throughout the skill.
@@ -431,8 +427,6 @@ calling.
 Walk the checklist below and tag each confirmed match as `slop:<pattern-id>`. For extended rationale and typical fixes on any
 matched pattern, see `references/ai-slop-patterns.md`.
 
-## AI Slop Checklist
-
 Walk this checklist during the design audit phase. Each positive match is a finding tagged `slop:<pattern-id>` with default
 severity **Medium** unless context makes it worse (e.g. lorem ipsum in a production checkout flow is Critical, not Medium).
 
@@ -539,8 +533,6 @@ designer) as `deferred` regardless of tier.
 
 **CSS-first bias.** When a finding can be fixed by touching only CSS/tokens/classes, prefer that path over component
 restructuring. CSS-only fixes are safer, faster to revert, and rarely introduce regressions in behavior.
-
-## Fix Discipline
 
 The rules in this section apply to every fix loop. They are parameterized by two tokens that each calling skill must
 substitute:
@@ -775,8 +767,6 @@ If the repo has a `TODOS.md`:
 ---
 
 ## Phase 15: Capture learnings
-
-## Capture Learnings
 
 Before closing the session, reflect on what you discovered that wasn't obvious from the code alone. Log genuine insights so
 future sessions start smarter.

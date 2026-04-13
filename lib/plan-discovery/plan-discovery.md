@@ -1,5 +1,3 @@
-## Plan Context Discovery
-
 Before doing anything else, scan the project for plan and spec documents. These are created by planning tools (e.g.
 superpowers, /plan, /spec) and contain feature scope, acceptance criteria, and user flows — exactly what you need to focus
 your QA or design review.
@@ -77,8 +75,12 @@ Options (dynamically built from discovered files, plus always include):
    Acceptance criteria: [count] items
    Known risks: [list or "none flagged"]
    ```
-4. Use this context throughout the session: prioritize testing documented user flows, map acceptance criteria directly to
-   test cases, note passes vs. failures in the final report.
+4. Use this context throughout the session:
+   - Prioritize testing the documented user flows over generic exploration.
+   - Map each acceptance criterion directly to a test case or audit check.
+   - Note each acceptance criterion as **pass** or **fail** in the final report.
+   - Add a dedicated **"Acceptance Criteria Coverage"** section to the final report listing every criterion with its pass /
+     fail status, so downstream readers (PR reviewers, next-session planners) can scan it without re-reading the plan.
 
 **If the user selects "No plan":** print
 `Running general session — no feature plan loaded. Testing will cover the full application.` and continue.

@@ -1,5 +1,3 @@
-## Browser Primitives (Playwright MCP)
-
 All browser interactions go through the Playwright MCP server. Tool names follow the pattern
 `mcp__plugin_playwright_playwright__<action>`. Use this table as a reference throughout the skill.
 

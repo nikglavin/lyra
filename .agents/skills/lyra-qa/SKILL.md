@@ -43,8 +43,6 @@ Produce a structured report with before/after evidence and a health score.
 
 ## Phase 0: Plan context discovery
 
-## Plan Context Discovery
-
 Before doing anything else, scan the project for plan and spec documents. These are created by planning tools (e.g.
 superpowers, /plan, /spec) and contain feature scope, acceptance criteria, and user flows — exactly what you need to focus
 your QA or design review.
@@ -122,8 +120,12 @@ Options (dynamically built from discovered files, plus always include):
    Acceptance criteria: [count] items
    Known risks: [list or "none flagged"]
    ```
-4. Use this context throughout the session: prioritize testing documented user flows, map acceptance criteria directly to
-   test cases, note passes vs. failures in the final report.
+4. Use this context throughout the session:
+   - Prioritize testing the documented user flows over generic exploration.
+   - Map each acceptance criterion directly to a test case or audit check.
+   - Note each acceptance criterion as **pass** or **fail** in the final report.
+   - Add a dedicated **"Acceptance Criteria Coverage"** section to the final report listing every criterion with its pass /
+     fail status, so downstream readers (PR reviewers, next-session planners) can scan it without re-reading the plan.
 
 **If the user selects "No plan":** print
 `Running general session — no feature plan loaded. Testing will cover the full application.` and continue.
@@ -134,8 +136,6 @@ Options (dynamically built from discovered files, plus always include):
 ---
 
 ## Prior learnings
-
-## Prior Learnings
 
 Before running the main work, load knowledge from previous sessions on this project. Past runs may have discovered
 non-obvious quirks — custom ports, flaky animations, auth session timeouts, build order dependencies — that would waste time
@@ -184,8 +184,6 @@ fi
 ---
 
 ## Browser Primitives
-
-## Browser Primitives (Playwright MCP)
 
 All browser interactions go through the Playwright MCP server. Tool names follow the pattern
 `mcp__plugin_playwright_playwright__<action>`. Use this table as a reference throughout the skill.
@@ -260,8 +258,6 @@ requires auth, either script the login flow as part of Phase 8 or point the skil
 
 **If no URL is given and you're on a feature branch:** Automatically enter diff-aware mode (see Modes below). This is the
 most common case — the user shipped code on a branch and wants to verify it.
-
-## Clean Working Tree Gate
 
 Before any phase that will produce commits, confirm the working tree is clean.
 
@@ -682,7 +678,10 @@ For each fixable issue, in severity order:
 **This skill uses `FIX_PREFIX = fix(qa)` and leaves `FIX_CAP` unset (no hard cap — but the WTF > 20% rule still applies).**
 The fix loop follows the rules in `lib/fix-discipline/fix-discipline.md`.
 
-## Fix Discipline
+**Finding ID format:** the transcluded rules below use `FINDING-NNN` as a neutral placeholder for bug identifiers. For this
+skill, substitute `ISSUE-NNN` everywhere the transcluded content says `FINDING-NNN` — commit messages, regression test
+attribution comments, regression test commit messages, and the `AskUserQuestion` prompt after 3 failed fixes. This matches
+the `ISSUE-NNN` convention already used in Phase 5 Document and the report template.
 
 The rules in this section apply to every fix loop. They are parameterized by two tokens that each calling skill must
 substitute:
@@ -937,8 +936,6 @@ If the repo has a `TODOS.md`:
 ---
 
 ## Capture learnings
-
-## Capture Learnings
 
 Before closing the session, reflect on what you discovered that wasn't obvious from the code alone. Log genuine insights so
 future sessions start smarter.

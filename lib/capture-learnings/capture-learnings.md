@@ -1,5 +1,3 @@
-## Capture Learnings
-
 Before closing the session, reflect on what you discovered that wasn't obvious from the code alone. Log genuine insights so
 future sessions start smarter.
 

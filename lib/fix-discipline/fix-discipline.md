@@ -1,5 +1,3 @@
-## Fix Discipline
-
 The rules in this section apply to every fix loop. They are parameterized by two tokens that each calling skill must
 substitute:
 

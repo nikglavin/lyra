@@ -470,6 +470,11 @@ For each fixable issue, in severity order:
 **This skill uses `FIX_PREFIX = fix(qa)` and leaves `FIX_CAP` unset (no hard cap — but the WTF > 20% rule still applies).**
 The fix loop follows the rules in `lib/fix-discipline/fix-discipline.md`.
 
+**Finding ID format:** the transcluded rules below use `FINDING-NNN` as a neutral placeholder for bug identifiers. For this
+skill, substitute `ISSUE-NNN` everywhere the transcluded content says `FINDING-NNN` — commit messages, regression test
+attribution comments, regression test commit messages, and the `AskUserQuestion` prompt after 3 failed fixes. This matches
+the `ISSUE-NNN` convention already used in Phase 5 Document and the report template.
+
 {{lib/fix-discipline/fix-discipline.md}}
 
 ---

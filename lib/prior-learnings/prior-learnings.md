@@ -1,5 +1,3 @@
-## Prior Learnings
-
 Before running the main work, load knowledge from previous sessions on this project. Past runs may have discovered
 non-obvious quirks — custom ports, flaky animations, auth session timeouts, build order dependencies — that would waste time
 to rediscover.

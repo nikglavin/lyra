@@ -1,5 +1,3 @@
-## Clean Working Tree Gate
-
 Before any phase that will produce commits, confirm the working tree is clean.
 
 ```bash
