@@ -32,10 +32,14 @@ find . \
   2>/dev/null | sort
 ```
 
-Also check common dedicated directories:
+Also check common dedicated directories. Wrap in a subshell with `nullglob` / `nonomatch` so missing directories don't emit
+shell-expansion errors:
 
 ```bash
-ls docs/superpowers/plans/*.md docs/*.md plans/*.md specs/*.md .plans/*.md .specs/*.md 2>/dev/null | sort
+(
+  setopt NULL_GLOB 2>/dev/null || shopt -s nullglob 2>/dev/null || true
+  ls -1 docs/superpowers/plans/*.md docs/*.md plans/*.md specs/*.md .plans/*.md .specs/*.md 2>/dev/null
+) | sort -u
 ```
 
 **Build the options list from what you find.** Then use `AskUserQuestion`:

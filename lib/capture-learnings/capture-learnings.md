@@ -29,6 +29,13 @@ echo '{"skill":"SKILL_NAME","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","type":"TYPE
 **Replace `SKILL_NAME` with the calling skill's short identifier** — use `"qa"` for `lyra-qa` and `"qa-design"` for
 `lyra-qa-design`. This lets future sessions filter by source.
 
+**Replace `N` with an unquoted digit 1–10** — `N` is a JSON number placeholder sitting outside quotes. Copying the snippet
+literally produces invalid JSON (`"confidence":N`) that will break any future `jq` read. Substitute a concrete confidence
+score per the scale below (e.g. `"confidence":9`).
+
+**Replace `TYPE`, `SHORT_KEY`, and `DESCRIPTION`** with the real values for the entry. The JSON-string placeholders stay
+quoted; only `N` is unquoted.
+
 **Types:**
 
 - `pitfall` — something that failed and will fail again if not avoided
