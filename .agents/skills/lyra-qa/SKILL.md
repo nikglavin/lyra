@@ -41,16 +41,17 @@ Produce a structured report with before/after evidence and a health score.
 
 ---
 
-## Phase 0: Plan Context Discovery
+## Phase 0: Plan context discovery
+
+## Plan Context Discovery
 
 Before doing anything else, scan the project for plan and spec documents. These are created by planning tools (e.g.
 superpowers, /plan, /spec) and contain feature scope, acceptance criteria, and user flows — exactly what you need to focus
-your QA.
+your QA or design review.
 
 **Auto-detect plan and spec files:**
 
 ```bash
-# Common plan/spec file locations and naming patterns
 find . \
   -not -path '*/node_modules/*' \
   -not -path '*/.git/*' \
@@ -76,35 +77,35 @@ find . \
   2>/dev/null | sort
 ```
 
-Also check common dedicated directories (including superpowers' default plan location):
+Also check common dedicated directories. Wrap in a subshell with `nullglob` / `nonomatch` so missing directories don't emit
+shell-expansion errors:
 
 ```bash
-ls docs/superpowers/plans/*.md docs/*.md plans/*.md specs/*.md .plans/*.md .specs/*.md 2>/dev/null | sort
+(
+  setopt NULL_GLOB 2>/dev/null || shopt -s nullglob 2>/dev/null || true
+  ls -1 docs/superpowers/plans/*.md docs/*.md plans/*.md specs/*.md .plans/*.md .specs/*.md 2>/dev/null
+) | sort -u
 ```
 
-**Build the options list from what you find.** Then use AskUserQuestion:
+**Build the options list from what you find.** Then use `AskUserQuestion`:
 
----
-
-**Re-ground:** We're about to start a QA session on this project. Before testing anything, I want to understand what feature
-or change we're validating — so I can focus on the right flows and acceptance criteria.
-
-**Simplify:** I found [N] plan/spec document(s) in this project. These files describe what the feature is supposed to do,
-which is the most important input to a QA session. Without them, I'll test everything generically. With them, I'll test
-exactly what was built and what it needs to do.
-
-**RECOMMENDATION:** Choose the plan/spec that matches the feature you just built (Completeness: 9/10). If you're doing a
-general health check with no specific feature, choose "No plan — general QA" (Completeness: 6/10).
+> **Re-ground:** We're about to start a session on this project. Before testing anything, I want to understand what feature
+> or change we're validating — so I can focus on the right flows and acceptance criteria.
+>
+> **Simplify:** I found [N] plan/spec document(s) in this project. These files describe what the feature is supposed to do,
+> which is the most important input to a session. Without them, I'll test everything generically. With them, I'll test
+> exactly what was built and what it needs to do.
+>
+> **RECOMMENDATION:** Choose the plan/spec that matches the feature you just built (Completeness: 9/10). If you're doing a
+> general health check with no specific feature, choose "No plan — general session" (Completeness: 6/10).
 
 Options (dynamically built from discovered files, plus always include):
 
 - **A) [filename] — [first line or title of the file as preview]**
 - **B) [filename] — [first line or title of the file as preview]**
-- ... (one option per discovered file)
-- **[Last - 1]) Enter a path manually — I'll tell you where the file is**
-- **[Last]) No plan — run general QA without feature context**
-
----
+- … one option per discovered file
+- **[Last − 1]) Enter a path manually — I'll tell you where the file is**
+- **[Last]) No plan — run general session without feature context**
 
 **After the user selects a plan file:**
 
@@ -114,34 +115,33 @@ Options (dynamically built from discovered files, plus always include):
    - **Key user flows** — what workflows must work end-to-end?
    - **Acceptance criteria** — what does "done" look like?
    - **Known edge cases or risks** — anything the plan flagged as tricky?
-3. Print a "QA Context Loaded" summary:
+3. Print a "Context Loaded" summary:
    ```
-   📋 QA Context: [feature name]
+   Context: [feature name]
    Flows to validate: [list]
    Acceptance criteria: [count] items
    Known risks: [list or "none flagged"]
    ```
-4. Use this context throughout the session:
-   - Prioritize testing the documented user flows in Phase 4
-   - Map acceptance criteria directly to test cases
-   - Note any acceptance criteria that **pass** vs **fail** in the final report
-   - Add a "Acceptance Criteria Coverage" section to the report
+4. Use this context throughout the session: prioritize testing documented user flows, map acceptance criteria directly to
+   test cases, note passes vs. failures in the final report.
 
-**If the user selects "No plan":** Print
-`Running general QA — no feature plan loaded. Testing will cover the full application.` and continue.
+**If the user selects "No plan":** print
+`Running general session — no feature plan loaded. Testing will cover the full application.` and continue.
 
-**If the user selects "Enter a path manually":** Ask them to type the path, then read and process that file.
+**If the user selects "Enter a path manually":** ask the user to type the path, then read and process that file.
+
 
 ---
 
+## Prior learnings
+
 ## Prior Learnings
 
-Before running any tests, load knowledge from previous QA sessions on this project. Past runs may have discovered non-obvious
-quirks — custom ports, flaky animations, auth session timeouts, build order dependencies — that would waste time to
-rediscover.
+Before running the main work, load knowledge from previous sessions on this project. Past runs may have discovered
+non-obvious quirks — custom ports, flaky animations, auth session timeouts, build order dependencies — that would waste time
+to rediscover.
 
 ```bash
-# Derive a stable project slug from the git root directory name
 _SLUG=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")
 _LEARN_DIR="$HOME/.lyra/projects/$_SLUG"
 _LEARN_FILE="$_LEARN_DIR/learnings.jsonl"
@@ -151,32 +151,35 @@ if [ -f "$_LEARN_FILE" ]; then
   echo "LEARNINGS: $_COUNT entries found"
   cat "$_LEARN_FILE"
 else
-  echo "LEARNINGS: 0 — first QA session for project: $_SLUG"
+  echo "LEARNINGS: 0 — first session for project: $_SLUG"
 fi
 ```
 
 **If learnings are found (`LEARNINGS: N` where N > 0):**
 
-1. Parse each JSONL line and read the `key`, `insight`, `type`, and `confidence` fields.
-2. Print a summary before testing begins:
+1. Parse each JSONL line and read the `key`, `insight`, `type`, `confidence`, and `skill` fields.
+2. Print a summary before the session begins:
    ```
-   🧠 Prior Learnings Loaded (N entries for project: {slug})
+   Prior Learnings Loaded (N entries for project: {slug})
    ─────────────────────────────────────────────────────
-   [pitfall]   auth-cookie-expires (confidence 9/10)
+   [pitfall]   auth-cookie-expires (confidence 9/10) [skill: qa]
                → Session cookies expire after 30min in staging — re-login before checkout tests
-   [operational] dev-server-port (confidence 10/10)
+   [operational] dev-server-port (confidence 10/10) [skill: qa-design]
                → Dev server runs on :5173, not :3000
-   ...
+   …
    ```
 3. Apply relevant learnings throughout the session:
-   - `pitfall` learnings → actively avoid the described failure mode
-   - `operational` learnings → use the correct ports, commands, config immediately
-   - `pattern` learnings → note if the pattern is still present or has been resolved
-   - `preference` learnings → respect user-stated preferences for testing approach
-4. When a learning directly influences a test decision, note it inline: **"Prior learning applied: {key} (confidence
-   {N}/10)"**
+   - `pitfall` → actively avoid the described failure mode
+   - `operational` → use the correct ports, commands, config immediately
+   - `pattern` → note if the pattern is still present or has been resolved
+   - `preference` → respect user-stated preferences
+   - `architecture` → use when reasoning about where a finding's root cause lives
+4. Learnings are shared across `lyra-qa` and `lyra-qa-design` (same JSONL file). A learning captured in one skill applies to
+   future runs of the other.
+5. When a learning directly influences a decision, note it inline: **"Prior learning applied: {key} (confidence {N}/10)"**
 
-**If LEARNINGS: 0:** Print `No prior learnings — this is the first QA session for {slug}.` and continue.
+**If `LEARNINGS: 0`:** Print `No prior learnings — this is the first session for {slug}.` and continue.
+
 
 ---
 
@@ -258,25 +261,30 @@ requires auth, either script the login flow as part of Phase 8 or point the skil
 **If no URL is given and you're on a feature branch:** Automatically enter diff-aware mode (see Modes below). This is the
 most common case — the user shipped code on a branch and wants to verify it.
 
-**Check for clean working tree:**
+## Clean Working Tree Gate
+
+Before any phase that will produce commits, confirm the working tree is clean.
 
 ```bash
 git status --porcelain
 ```
 
-If non-empty, STOP and use AskUserQuestion:
+If the output is non-empty (dirty tree), STOP and use `AskUserQuestion`:
 
-> Your working tree has uncommitted changes. /lyra-qa needs a clean tree so each bug fix gets its own atomic commit.
+> Your working tree has uncommitted changes. This skill needs a clean tree so each fix gets its own atomic commit.
 
 Options:
 
-- A) Commit my changes — commit all current changes with a descriptive message, then start QA
-- B) Stash my changes — stash, run QA, pop the stash after
-- C) Abort — I'll clean up manually
+- **A) Commit my changes** — commit all current changes with a descriptive message, then proceed.
+- **B) Stash my changes** — `git stash push -u -m "pre-<skill-name>"`, proceed, then `git stash pop` at the end of the
+  session.
+- **C) Abort** — exit and let the user clean up manually.
 
-RECOMMENDATION: Choose A because uncommitted work should be preserved before QA adds its own fix commits.
+**RECOMMENDATION:** Choose A because uncommitted work should be preserved as a commit before the skill adds its own fix
+commits.
 
-After the user chooses, execute their choice, then continue.
+After the user chooses, execute their choice, then continue the skill.
+
 
 **Detect the git branch:**
 
@@ -671,49 +679,47 @@ of tier.
 
 For each fixable issue, in severity order:
 
-> [!IMPORTANT] **THE IRON LAW: NO FIX WITHOUT ROOT CAUSE FIRST.** You cannot write a single line of fix code until you have
-> completed 8a (Root Cause Investigation). Skipping to a fix is the most common cause of WTF-likelihood climbing. Quick
-> patches mask underlying issues.
+**This skill uses `FIX_PREFIX = fix(qa)` and leaves `FIX_CAP` unset (no hard cap — but the WTF > 20% rule still applies).**
+The fix loop follows the rules in `lib/fix-discipline/fix-discipline.md`.
 
-### 8a. Root Cause Investigation
+## Fix Discipline
 
-**BEFORE touching any code, you MUST complete all of the following:**
+The rules in this section apply to every fix loop. They are parameterized by two tokens that each calling skill must
+substitute:
 
-**1. Read the error carefully**
+- **`FIX_PREFIX`** — the commit-message prefix for fixes. Use `fix(qa)` for `lyra-qa`, `style(design)` for `lyra-qa-design`.
+- **`FIX_CAP`** — the hard upper bound on fixes per run. Use `30` for `lyra-qa-design`, leave unset for `lyra-qa` (no cap).
 
-- Don't skim past errors or console output — they often contain the exact answer
-- Read stack traces completely; note line numbers, file paths, error codes
-- Check the browser console screenshot you took when you documented the issue
+Before entering the fix loop, the calling skill MUST print which values it uses so the reader sees the substitution
+concretely.
 
-**2. Reproduce it consistently**
+---
 
-- Can you trigger it reliably with specific steps?
-- Does it happen every time, or intermittently?
-- If not reproducible → gather more data, do NOT guess
+### The Iron Law — no fix without root cause
 
-**3. Check recent changes**
+> [!IMPORTANT] **NO FIX WITHOUT ROOT CAUSE FIRST.** You cannot write a single line of fix code until you have completed the
+> root-cause investigation below. Skipping to a fix is the most common cause of WTF-likelihood climbing. Quick patches mask
+> underlying issues.
 
-```bash
-git log --oneline -10
-git diff main...HEAD --name-only
-```
+**Root-cause investigation steps (all required):**
 
-What changed that could cause this? New dependencies, config changes, env differences?
+1. **Read the error carefully.** Don't skim — error messages and stack traces usually contain the exact answer. Check any
+   browser console screenshot you took when documenting the issue.
+2. **Reproduce it consistently.** Can you trigger it reliably with specific steps? If not reproducible, gather more data — do
+   NOT guess.
+3. **Check recent changes.**
 
-**4. Trace the data flow** (for multi-component failures) For each component boundary involved:
+   ```bash
+   git log --oneline -10
+   git diff main...HEAD --name-only
+   ```
 
-- Log what enters the component
-- Log what exits the component
-- Identify WHERE it breaks before investigating WHY
+   What changed that could cause this? New dependencies, config changes, env differences?
 
-```bash
-# Example — binary search the failure point:
-# Add temporary console.log / echo statements at each layer boundary
-# Run once to see where the bad value originates, THEN remove
-```
-
-**5. Form a single hypothesis** Write it out: `"I think [X] is the root cause because [Y]."` Be specific. "Something is
-broken" is not a hypothesis.
+4. **Trace the data flow** (for multi-component failures). Log what enters and exits each component boundary. Identify WHERE
+   it breaks before investigating WHY.
+5. **Form a single hypothesis.** Write it out: `"I think [X] is the root cause because [Y]."` Be specific. "Something is
+   broken" is not a hypothesis.
 
 **Red flags — STOP and return to step 1 if you catch yourself thinking:**
 
@@ -724,130 +730,124 @@ broken" is not a hypothesis.
 - "One more fix attempt" (when you've already tried 2+)
 - Each fix reveals a new problem in a different place → **that's an architecture problem, not a bug**
 
-### 8b. Fix
+---
+
+### The fix itself
 
 With root cause confirmed, make the **minimal fix** — the smallest single change that resolves the identified root cause.
 
 - ONE change at a time. Test one hypothesis at a time.
 - Do NOT refactor surrounding code, add features, or "improve" unrelated things.
-- Do NOT bundle multiple fixes.
+- Do NOT bundle multiple fixes into a single diff.
 
 **If the fix doesn't work:**
 
-- Attempt 1 failed → return to 8a, re-analyse with new information
-- Attempt 2 failed → return to 8a, deeper investigation
-- **Attempt 3 failed → STOP.** Do not attempt Fix #4. Use AskUserQuestion:
-  > "I've tried 3 fixes for ISSUE-NNN without success. Each attempt is revealing a different symptom, which suggests an
-  > architectural problem rather than a simple bug. Should I: A) Defer this issue and continue, B) Do a deeper architectural
-  > analysis before attempting more fixes, C) Abort the fix loop entirely." RECOMMENDATION: Choose B — fixing symptoms of an
-  > architectural problem creates more bugs.
+- Attempt 1 failed → return to root-cause investigation, re-analyse with new information.
+- Attempt 2 failed → return to root-cause investigation, deeper dig.
+- **Attempt 3 failed → STOP.** Do not attempt Fix #4. Use `AskUserQuestion`:
+  > I've tried 3 fixes for FINDING-NNN without success. Each attempt is revealing a different symptom, which suggests an
+  > architectural problem rather than a simple bug. Should I: **A)** Defer this finding and continue, **B)** Do a deeper
+  > architectural analysis before attempting more fixes, **C)** Abort the fix loop entirely. **RECOMMENDATION:** Choose B —
+  > fixing symptoms of an architectural problem creates more bugs.
 
-### 8c. Commit
+---
+
+### Commit
 
 ```bash
 git add <only-changed-files>
-git commit -m "fix(qa): ISSUE-NNN — short description"
+git commit -m "FIX_PREFIX: FINDING-NNN — short description"
 ```
 
-One commit per fix. Never bundle multiple fixes.
+**Rules:**
 
-### 8d. Re-test (Verification Gate)
+- One commit per fix. Never bundle multiple fixes.
+- Message format: literal `FIX_PREFIX: FINDING-NNN — description`, with `FIX_PREFIX` substituted by the caller (e.g.
+  `fix(qa):`, `style(design):`).
+- Only stage files directly related to the fix. Never `git add -A` or `git add .`.
 
-> [!IMPORTANT] **THE VERIFICATION GATE: EVIDENCE BEFORE CLAIMS.** You cannot classify a fix as "verified" without running
-> through this gate in full. "Should be fixed", "looks correct", and "probably works" are not verification.
+---
 
-For every fix, run the gate in order:
+### The Verification Gate — evidence before claims
 
-**Gate Step 1 — IDENTIFY:** What exact observation would prove this fix worked?
+> [!IMPORTANT] **EVIDENCE BEFORE CLAIMS.** You cannot classify a fix as "verified" without running through this gate in full.
+> "Should be fixed", "looks correct", and "probably works" are not verification.
 
-- For a UI bug: the broken element now renders correctly (screenshot)
-- For a JS error: the console shows zero new errors after the triggering interaction
-- For a form failure: form submits successfully and reaches the expected state
-- For an API bug: the network response returns the expected status and data
+Run every step of the gate, in order:
 
-**Gate Step 2 — RUN:** Execute the exact verification:
+**Gate Step 1 — IDENTIFY.** What exact observation would prove this fix worked?
 
-Use `browser_navigate` to go to the EXACT affected URL (fresh load, not cached). Reproduce the EXACT steps that triggered the
-bug using the appropriate Playwright MCP tools. Call `browser_take_screenshot` — the image returns inline in the tool result.
-Call `browser_console_messages` to check for errors. If applicable, call `browser_network_requests` to list any failed
-requests — no tab-switching needed.
+- For a UI bug: the broken element now renders correctly (screenshot).
+- For a JS error: the console shows zero new errors after the triggering interaction.
+- For a form failure: the form submits successfully and reaches the expected state.
+- For an API bug: the network response returns the expected status and data.
+- For a design finding: the screenshot visibly matches the described expected state.
 
-**Gate Step 3 — READ:** Look at the output fully.
+**Gate Step 2 — RUN.** Execute the exact verification using the Playwright MCP tools from `lib/playwright-primitives`.
+Navigate to the affected URL with a fresh load, reproduce the exact steps that exposed the finding, take a screenshot, read
+console messages, read network requests if relevant.
 
-- New errors in console? → NOT verified
-- Broken behaviour still visible? → NOT verified
-- New broken behaviour introduced? → REVERTED immediately
+**Gate Step 3 — READ.** Look at the output fully.
 
-**Gate Step 4 — VERIFY:** Does the output confirm your Gate Step 1 claim?
+- New errors in console? → NOT verified.
+- Broken behaviour still visible? → NOT verified.
+- New broken behaviour introduced? → REVERTED immediately (`git revert HEAD`).
 
-- YES → proceed to classify as `verified`
-- NO → do NOT claim it's fixed; return to 8a
+**Gate Step 4 — VERIFY.** Does the output confirm your Gate Step 1 claim?
 
-**Gate Step 5 — SHOW:** The "before" screenshot was captured earlier in Phase 5 and is already visible in the conversation
-history. The "after" screenshot from Gate Step 2's `browser_take_screenshot` call returns inline in the tool result — the
-user sees it automatically. Do NOT re-`Read` the saved file (Rule 9). Just confirm both images are visible before proceeding.
+- YES → proceed to classify as `verified`.
+- NO → do NOT claim it's fixed; return to root-cause investigation.
 
-### 8e. Classify
+**Gate Step 5 — SHOW.** The screenshot from Gate Step 2 came back inline with the tool result — the user already sees it. Do
+not re-`Read` the saved file.
 
-Only classify AFTER the Verification Gate is complete. Never classify from memory or assumption.
+---
 
-- **verified**: Gate Steps 1–4 confirm the fix works AND no new console errors or visual regressions introduced
-- **best-effort**: Verification Gate could not be fully run (requires auth state you don't have, external service
-  unavailable, timing-dependent) — document exactly what could not be verified
-- **reverted**: Gate Step 3 detected a regression → `git revert HEAD` immediately → mark issue as "deferred"
+### Classify
 
-**You cannot claim a fix "works" without verified evidence. "Should work", "probably fixed", "looks right" → run the gate.**
+Only after the Verification Gate is complete. Never from memory or assumption.
 
-### 8e.5. Regression Test
+- **verified** — Gate Steps 1–4 confirm the fix works AND no new errors or regressions.
+- **best-effort** — Verification Gate couldn't be fully run (e.g. requires auth you don't have, external service unavailable,
+  timing-dependent). Document exactly what could not be verified.
+- **reverted** — Gate Step 3 detected a regression → `git revert HEAD` immediately, mark the finding as `deferred`.
 
-Skip if: classification is not "verified", OR fix is purely visual/CSS with no JS behavior, OR no test framework was detected
-AND user declined bootstrap.
+**You cannot claim a fix "works" without verified evidence.**
 
-**1. Study the project's existing test patterns:** Read 2–3 test files closest to the fix (same directory, same code type).
-Match exactly: file naming, imports, assertion style, describe/it nesting, setup/teardown. The regression test must look like
-it was written by the same developer.
+---
 
-**2. Trace the bug's codepath, then write a regression test:**
+### Regression tests
 
-- What input/state triggered the bug? (exact precondition)
-- What codepath did it follow? (which branches, which function calls)
-- Where did it break? (exact line/condition that failed)
-- What other inputs could hit the same codepath? (edge cases)
+Skip if: classification is not `verified`, OR the fix is purely visual/CSS with no JS behavior, OR no test framework was
+detected AND the user declined bootstrap.
 
-The test MUST:
+**1. Study existing test patterns.** Read 2–3 test files closest to the fix. Match naming, imports, assertion style,
+describe/it nesting, setup/teardown. The regression test must look like it was written by the same developer.
 
-- Set up the exact precondition that triggered the bug
-- Perform the action that exposed the bug
-- Assert correct behavior (NOT "it renders" or "it doesn't throw")
-- Test adjacent edge cases found while tracing
-- Include attribution comment:
-  ```
-  // Regression: ISSUE-NNN — {what broke}
-  // Found by /lyra-qa on {YYYY-MM-DD}
-  // Report: .lyra/qa-reports/qa-report-{domain}-{date}.md
-  ```
+**2. Trace the bug's codepath, then write a test.** Set up the exact precondition, perform the action, assert correct
+behavior (not "it renders" or "it doesn't throw"). Include:
 
-Test type decision:
+```
+// Regression: FINDING-NNN — {what broke}
+// Found by {skill-name} on {YYYY-MM-DD}
+// Report: .lyra/{skill-name}/report-{date}.md
+```
 
-- Console error / JS exception / logic bug → unit or integration test
-- Broken form / API failure / data flow bug → integration test with request/response
-- Visual bug with JS behavior → component test
-- Pure CSS → skip (caught by QA reruns)
+Use auto-incrementing file names: check existing `{name}.regression-*.test.{ext}` files, take max + 1.
 
-Generate unit tests. Mock all external dependencies (DB, API, Redis, file system).
+**3. Run only the new test file.**
 
-Use auto-incrementing names: check existing `{name}.regression-*.test.{ext}` files, take max + 1.
-
-**3. Run only the new test file** and evaluate:
-
-- Passes → commit: `git commit -m "test(qa): regression test for ISSUE-NNN — {desc}"`
-- Fails → fix once. Still failing → delete test, defer.
+- Passes → commit: `git commit -m "test({skill-short}): regression test for FINDING-NNN — {desc}"` (substitute
+  `{skill-short}` to match FIX_PREFIX's scope: `qa` or `design`).
+- Fails → fix once. Still failing → delete test, defer the finding.
 
 **Test commits do not count toward WTF-likelihood.**
 
-### 8f. Self-Regulation (STOP AND EVALUATE)
+---
 
-Every 5 fixes (or after any revert), compute WTF-likelihood:
+### WTF-Likelihood — self-regulation
+
+Every 5 fixes, OR immediately after any revert, recompute WTF-likelihood:
 
 ```
 WTF-LIKELIHOOD:
@@ -855,13 +855,19 @@ WTF-LIKELIHOOD:
   Each revert:                +15%
   Each fix touching >3 files: +5%
   After fix 15:               +1% per additional fix
-  All remaining Low severity: +10%
   Touching unrelated files:   +20%
 ```
 
-**If WTF > 20%:** STOP immediately. Show the user what you've done. Ask whether to continue.
+**Calling skills may add category-specific modifiers** in addition to the base heuristic. For example, `lyra-qa-design` adds
+`+0% for CSS-only changes, +5% per JSX/TSX/component file changed` — CSS is cheap, component restructures are risky.
 
-**Hard cap: 50 fixes.** After 50 fixes, stop regardless of remaining issues.
+**If WTF > 20%:** STOP immediately. Show the user what you've done so far. Use `AskUserQuestion` with A) continue, B) stop
+here and report. RECOMMENDATION: stop.
+
+**Hard cap: `FIX_CAP` fixes.** After that many fixes, stop regardless of remaining findings. Substitute `FIX_CAP` with the
+calling skill's cap. If the calling skill leaves `FIX_CAP` unset, there is no cap — but you must still obey the WTF > 20%
+rule.
+
 
 ---
 
@@ -926,14 +932,16 @@ If the repo has a `TODOS.md`:
 12. **One commit per fix.** Never bundle multiple fixes into one commit.
 13. **Only create new test files.** Never modify existing tests, never modify CI configuration.
 14. **Revert on regression.** If a fix makes things worse, `git revert HEAD` immediately.
-15. **Self-regulate.** Follow the WTF-likelihood heuristic. When in doubt, stop and ask.
+15. **Self-regulate.** Follow the WTF-likelihood rules in `lib/fix-discipline`. When in doubt, stop and ask.
 
 ---
+
+## Capture learnings
 
 ## Capture Learnings
 
 Before closing the session, reflect on what you discovered that wasn't obvious from the code alone. Log genuine insights so
-future QA sessions start smarter.
+future sessions start smarter.
 
 **Ask yourself:**
 
@@ -942,6 +950,8 @@ future QA sessions start smarter.
 - Did a fix reveal a recurring architectural pattern worth knowing?
 - Did something take longer because of a missing flag or project quirk?
 - Is there a flaky UI element (animation timing, lazy load) that caused false positives?
+- (For design-review sessions) Did you discover a repeated design smell that the codebase can't easily fix (e.g. third-party
+  widget that looks generated)?
 
 **Only log it if:** knowing this would save 5+ minutes in a future session.
 
@@ -952,21 +962,31 @@ future QA sessions start smarter.
 ```bash
 _SLUG=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")
 mkdir -p "$HOME/.lyra/projects/$_SLUG"
-echo '{"skill":"qa","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"files":["path/to/relevant/file"]}' \
+echo '{"skill":"SKILL_NAME","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"files":["path/to/relevant/file"]}' \
   >> "$HOME/.lyra/projects/$_SLUG/learnings.jsonl"
 ```
+
+**Replace `SKILL_NAME` with the calling skill's short identifier** — use `"qa"` for `lyra-qa` and `"qa-design"` for
+`lyra-qa-design`. This lets future sessions filter by source.
+
+**Replace `N` with an unquoted digit 1–10** — `N` is a JSON number placeholder sitting outside quotes. Copying the snippet
+literally produces invalid JSON (`"confidence":N`) that will break any future `jq` read. Substitute a concrete confidence
+score per the scale below (e.g. `"confidence":9`).
+
+**Replace `TYPE`, `SHORT_KEY`, and `DESCRIPTION`** with the real values for the entry. The JSON-string placeholders stay
+quoted; only `N` is unquoted.
 
 **Types:**
 
 - `pitfall` — something that failed and will fail again if not avoided
 - `operational` — project environment facts (ports, commands, env vars, config quirks)
 - `pattern` — a recurring code or UI pattern worth knowing for future test design
-- `preference` — something the user explicitly told you about testing approach
-- `architecture` — a structural decision that affects how bugs manifest
+- `preference` — something the user explicitly told you about approach
+- `architecture` — a structural decision that affects how issues manifest
 
 **Confidence (1–10):**
 
-- 10 = directly observed and verified (e.g. checked the vite config, confirmed port)
+- 10 = directly observed and verified (e.g. checked the config, confirmed port)
 - 8–9 = observed in code or behaviour, high confidence
 - 5–7 = inferred from symptoms, not verified in source
 - 1–4 = uncertain, logging speculatively
@@ -977,14 +997,17 @@ deleted or renamed.
 After logging, print:
 
 ```
-💾 Learnings saved: N new entries → ~/.lyra/projects/{slug}/learnings.jsonl
+Learnings saved: N new entries → ~/.lyra/projects/{slug}/learnings.jsonl
 ```
 
 If nothing genuine was discovered, print:
 
 ```
-💾 No new learnings to log — nothing non-obvious found this session.
+No new learnings to log — nothing non-obvious found this session.
 ```
+
+
+**For this skill, use `SKILL_NAME = "qa"`** when writing entries.
 
 ---
 
