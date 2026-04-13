@@ -18,16 +18,20 @@ echo ""
 removed=0
 skipped=0
 
-# Resolve a path's real (canonical) location, or empty string on failure.
+# Resolve a symlink target to its canonical real path.
+# $1 = the path of the symlink itself.
 resolve_real() {
-  local p="$1"
-  local dir base
-  dir="$(dirname "$p")"
-  base="$(basename "$p")"
-  if [ -d "$dir" ]; then
-    echo "$(cd "$dir" && pwd -P)/$base"
+  local link="$1"
+  local raw
+  raw="$(readlink "$link")"
+  case "$raw" in
+    /*) ;;
+    *) raw="$(dirname "$link")/$raw" ;;
+  esac
+  if [ -e "$raw" ]; then
+    (cd "$(dirname "$raw")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$raw")")
   else
-    echo ""
+    printf '\n'
   fi
 }
 
@@ -39,6 +43,42 @@ inside_repo() {
     *) return 1 ;;
   esac
 }
+
+# Remove skill symlinks that point into this repo.
+if [ -d "$REPO_ROOT/.agents/skills" ]; then
+  for skill_dir in "$REPO_ROOT/.agents/skills"/*/; do
+    skill_dir="${skill_dir%/}"
+    skill_name=$(basename "$skill_dir")
+    target="$HOME/.claude/skills/$skill_name"
+
+    if [ ! -e "$target" ] && [ ! -L "$target" ]; then
+      continue  # nothing there
+    fi
+
+    if [ -d "$target" ] && [ ! -L "$target" ]; then
+      echo "SKIP:     $target — real directory, not removing"
+      skipped=$((skipped + 1))
+      continue
+    fi
+
+    if [ -L "$target" ]; then
+      real="$(resolve_real "$target")"
+      if [ -n "$real" ] && inside_repo "$real"; then
+        rm "$target"
+        echo "Removed:  $target"
+        removed=$((removed + 1))
+      else
+        echo "SKIP:     $target — symlink points outside this repo"
+        skipped=$((skipped + 1))
+      fi
+      continue
+    fi
+
+    # File (not dir, not symlink). Leave it.
+    echo "SKIP:     $target — not a symlink, not removing"
+    skipped=$((skipped + 1))
+  done
+fi
 
 echo ""
 echo "Done. $removed link(s) removed, $skipped skipped."
