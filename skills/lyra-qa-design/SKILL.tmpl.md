@@ -64,6 +64,15 @@ or AI-generated-looking interfaces. Test with a browser, fix in source code, com
 - **Standard** (default) — fix Critical + High + Medium.
 - **Exhaustive (`--exhaustive`)** — fix all, including Low/cosmetic.
 
+**Modes determine how the run relates to previous runs:**
+
+- **full** (default) — run the complete baseline audit + fix loop + final audit from scratch.
+- **`--regression <baseline.json>`** — load the named baseline from a previous run, still perform Phase 9 baseline audit
+  fresh on the current code, then diff the new findings against the loaded baseline. The report adds a "Regression" section
+  listing: findings that regressed (new or worsened), findings that improved (fixed or reduced severity), and the score
+  deltas. The fix loop in Phase 11 prioritises regressed findings above new ones. If the named baseline file does not exist,
+  fall back to full mode and warn.
+
 **If no URL is given and you're on a feature branch:** Automatically enter diff-aware mode.
 
 - Analyse the branch diff (`git diff main...HEAD --name-only`).
@@ -124,7 +133,12 @@ scale, color palette). No automatic writes without user consent.
 
 {{lib/output-dir/output-dir.md}}
 
-**For this skill, `SKILL_NAME` is `lyra-qa-design`.** Artifacts go to `.lyra/lyra-qa-design/` inside the project root.
+**For this skill, `SKILL_NAME` is `lyra-qa-design`.** Artifacts go to `.lyra/lyra-qa-design/` inside the project root. The
+generic `OUTPUT_DIR=…/SKILL_NAME` assignment shown in the transcluded block above is a template; use the concrete assignment
+below instead — it replaces the generic one.
+
+**If the user specified a custom output directory in Phase 3** (e.g. "Output to /tmp/design"), substitute that path here
+instead of the default `.lyra/lyra-qa-design` value.
 
 ```bash
 OUTPUT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.lyra/lyra-qa-design"
@@ -150,7 +164,9 @@ _START=$(date +%s)
 
 ## Phase 8: Authenticate (if needed)
 
-If the user specified auth credentials, sign in before auditing. Use Playwright MCP:
+If the user specified auth credentials, sign in before auditing. Use Playwright MCP. Tool names below (e.g. `browser_click`)
+are shorthand for the full `mcp__plugin_playwright_playwright__browser_*` names from Phase 6 — use the full names when
+invoking.
 
 1. `browser_navigate` to the login URL.
 2. `browser_snapshot` to get element refs for the email/password fields.
@@ -169,15 +185,29 @@ learnings" capture phase so future runs can script them faster.
 
 ## Phase 9: Baseline design audit
 
-For each in-scope page, follow the checklist in `references/design-audit-checklist.md`:
+For each in-scope page, follow the checklist in `references/design-audit-checklist.md`. Browser tool names below are
+shorthand for the full `mcp__plugin_playwright_playwright__browser_*` names documented in Phase 6 — use the full names when
+calling.
+
+**Per-page steps:**
 
 1. **First impression** — `browser_navigate` to the page, `browser_take_screenshot` full-page at 1280×720, read the
-   screenshot inline, record 5-second read.
+   screenshot inline, record a 5-second read. The 1280×720 screenshot captured here also doubles as the desktop responsive
+   reference, so step 4 only needs the other breakpoints.
 2. **Per-category audit** — walk typography / color / layout / interaction / responsive / brand / design-system. Invoke the
    matching `lyra-*` skill via the Skill tool for judgment calls.
-3. **AI slop scan** — walk `{{lib/ai-slop/ai-slop.md}}`. Tag each confirmed match as `slop:<pattern-id>` and reference
-   `references/ai-slop-patterns.md` in the finding.
-4. **Responsive check** — `browser_resize` to 375×812 and 768×1024, take screenshots at each, compare hierarchy preservation.
+3. **AI slop scan** — see the dedicated sub-section below before moving on to step 4.
+4. **Responsive check** — `browser_resize` to 375×812 (mobile) and 768×1024 (tablet), take a screenshot at each, compare
+   hierarchy preservation against the 1280×720 first-impression screenshot.
+
+### AI slop scan (runs as step 3 of each page audit)
+
+Walk the checklist below and tag each confirmed match as `slop:<pattern-id>`. For extended rationale and typical fixes on any
+matched pattern, see `references/ai-slop-patterns.md`.
+
+{{lib/ai-slop/ai-slop.md}}
+
+**Continue to step 4 (responsive check) once the slop scan is complete.**
 
 **Write each finding to the report immediately** using the FINDING-NNN format from `references/design-report-template.md`.
 
@@ -243,8 +273,16 @@ After all fixes are applied:
 
 ## Phase 13: Report
 
-Fill in the report at `$OUTPUT_DIR/report-$(date +%Y-%m-%d).md` using the skeleton from
-`references/design-report-template.md`. Required sections:
+Compute the run duration from the start time captured in Phase 7:
+
+```bash
+_END=$(date +%s)
+DURATION=$(( _END - _START ))
+```
+
+Fill in the report at `$_REPORT_FILE` (the path captured in Phase 7 — do not recompute the date here; a run that spans
+midnight would otherwise write to a file that does not exist). Use the skeleton from `references/design-report-template.md`.
+Required sections:
 
 - Metadata (date, URL, branch, commit, tier, scope, duration, page count, screenshot count, DESIGN.md status)
 - Design Score and AI Slop Score with baseline → final deltas
@@ -271,8 +309,10 @@ If the repo has a `TODOS.md`:
 
 {{lib/capture-learnings/capture-learnings.md}}
 
-**For this skill, use `SKILL_NAME = "qa-design"`** when writing entries — this lets future `lyra-qa` and `lyra-qa-design`
-sessions filter or attribute learnings by source.
+**For this skill, use `SKILL_NAME = "qa-design"`** when writing entries. This is the short-form identifier stored in the
+`"skill"` field of each learnings JSONL row; it is intentionally distinct from the skill's directory name (`lyra-qa-design`)
+and from the `SKILL_NAME` used in Phase 7's output-dir context. Future `lyra-qa` and `lyra-qa-design` sessions share the same
+learnings file and use this field to filter or attribute entries.
 
 ---
 

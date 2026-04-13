@@ -130,7 +130,12 @@ Walk the checklist in `lib/ai-slop/ai-slop.md`. Refer to `references/ai-slop-pat
 
 ## Finding severity guide
 
-- **Critical** — breaks brand trust on first impression; the user would close the tab.
-- **High** — meaningful quality hit a first-time visitor would feel within 5 seconds.
-- **Medium** — polish issue felt subconsciously; erodes trust over repeated visits.
-- **Low** — nice-to-have; invisible to most users but would fail a design review.
+Each severity corresponds to a score deduction on both the `design_score` and the `ai_slop_score` (when the finding is tagged
+`slop:*`). Both scores start at 100 and are floored at 0. See Phase 9 of `SKILL.tmpl.md` for the full scoring formula.
+
+| Severity     | Deduction | When to use                                                              |
+| ------------ | --------- | ------------------------------------------------------------------------ |
+| **Critical** | −25       | Breaks brand trust on first impression; the user would close the tab.    |
+| **High**     | −15       | Meaningful quality hit a first-time visitor would feel within 5 seconds. |
+| **Medium**   | −8        | Polish issue felt subconsciously; erodes trust over repeated visits.     |
+| **Low**      | −3        | Nice-to-have; invisible to most users but would fail a design review.    |
