@@ -417,7 +417,10 @@ Use `browser_navigate` to go to the login URL. Call `browser_take_screenshot` to
 `browser_snapshot` to get refs for the email and password fields, then `browser_type` into each. Use `browser_snapshot` to
 find the submit button ref, then `browser_click` it. Call `browser_take_screenshot` to verify login succeeded.
 
-**If cookie file provided:** Import cookies via browser DevTools → Application → Cookies, then navigate to target.
+**If cookie file provided:** Playwright MCP does not expose a first-class cookie-import tool. Use `browser_evaluate` to set
+cookies programmatically via `document.cookie = "<name>=<value>; path=/; domain=<host>"` for each entry in the cookie file,
+then `browser_navigate` to the target. If the cookies are HTTP-only (not settable via `document.cookie`), acknowledge the
+limitation and ask the user to script the login flow instead.
 
 **If 2FA/OTP required:** Ask the user for the code and wait.
 
@@ -474,11 +477,16 @@ Then follow the **Per-Page Exploration Checklist** from `references/issue-taxono
 
 Document each issue **immediately when found** — don't batch them.
 
-**Interactive bugs** (broken flows, dead buttons, form failures): Call `browser_take_screenshot` before the action. Perform
-the action using the appropriate Playwright MCP tool (e.g. `browser_click`, `browser_type`). Call `browser_take_screenshot`
-to capture the result. Call `browser_console_messages` to capture any console errors.
+**Interactive bugs** (broken flows, dead buttons, form failures): Call `browser_take_screenshot` with the `filename`
+parameter set to `.lyra/qa-reports/screenshots/issue-NNN-step-1.png` before the action. Perform the action using the
+appropriate Playwright MCP tool (e.g. `browser_click`, `browser_type`). Call `browser_take_screenshot` again with filename
+`issue-NNN-result.png`. Call `browser_console_messages` to capture any console errors that appeared during the interaction.
 
-**Static bugs** (typos, layout issues, missing images): Call `browser_take_screenshot` showing the problem.
+**Static bugs** (typos, layout issues, missing images): Call `browser_take_screenshot` with filename `issue-NNN.png` showing
+the problem.
+
+The `filename` argument is important — the report template at `references/qa-report-template.md` references screenshots by
+the `issue-NNN-*` naming convention, and downstream consumers (TODOS.md annotations, PR descriptions) assume those paths.
 
 **Write each issue to the report immediately** using the template format from `references/qa-report-template.md`.
 
@@ -716,7 +724,9 @@ requests — no tab-switching needed.
 - YES → proceed to classify as `verified`
 - NO → do NOT claim it's fixed; return to 8a
 
-**Gate Step 5 — SHOW:** Read both before/after screenshots inline so the user can see the evidence.
+**Gate Step 5 — SHOW:** The "before" screenshot was captured earlier in Phase 5 and is already visible in the conversation
+history. The "after" screenshot from Gate Step 2's `browser_take_screenshot` call returns inline in the tool result — the
+user sees it automatically. Do NOT re-`Read` the saved file (Rule 9). Just confirm both images are visible before proceeding.
 
 ### 8e. Classify
 
