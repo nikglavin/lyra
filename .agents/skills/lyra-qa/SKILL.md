@@ -180,24 +180,59 @@ fi
 
 ---
 
-## Browser Primitives (computer_use)
+## Browser Primitives
 
-Use `computer_use` for all browser interactions. Reference these patterns throughout:
+## Browser Primitives (Playwright MCP)
 
-| Action                    | How                                                       |
-| ------------------------- | --------------------------------------------------------- |
-| Navigate to URL           | `computer_use`: open/navigate browser to URL              |
-| Take annotated screenshot | `computer_use`: screenshot, save to path                  |
-| Click element             | `computer_use`: click on [element description]            |
-| Fill a form field         | `computer_use`: click field → type "[value]"              |
-| Open DevTools console     | `computer_use`: Cmd+Option+J (mac) or F12 → Console tab   |
-| Check for JS errors       | `computer_use`: screenshot console after each interaction |
-| Set mobile viewport       | `computer_use`: resize browser window to 375×812          |
-| Scroll                    | `computer_use`: scroll down/up on page                    |
-| Hover                     | `computer_use`: hover over [element]                      |
-| Check network tab         | `computer_use`: DevTools → Network tab → screenshot       |
+All browser interactions go through the Playwright MCP server. Tool names follow the pattern
+`mcp__plugin_playwright_playwright__<action>`. Use this table as a reference throughout the skill.
 
-Always show screenshots to the user inline using Read after taking them so they can see evidence.
+| Action                            | Tool                                                          |
+| --------------------------------- | ------------------------------------------------------------- |
+| Navigate to a URL                 | `mcp__plugin_playwright_playwright__browser_navigate`         |
+| Go back in history                | `mcp__plugin_playwright_playwright__browser_navigate_back`    |
+| Take a screenshot                 | `mcp__plugin_playwright_playwright__browser_take_screenshot`  |
+| Get accessibility snapshot (refs) | `mcp__plugin_playwright_playwright__browser_snapshot`         |
+| Click an element                  | `mcp__plugin_playwright_playwright__browser_click`            |
+| Hover an element                  | `mcp__plugin_playwright_playwright__browser_hover`            |
+| Type into a field                 | `mcp__plugin_playwright_playwright__browser_type`             |
+| Fill a whole form at once         | `mcp__plugin_playwright_playwright__browser_fill_form`        |
+| Select a `<select>` option        | `mcp__plugin_playwright_playwright__browser_select_option`    |
+| Press a key                       | `mcp__plugin_playwright_playwright__browser_press_key`        |
+| Drag one element onto another     | `mcp__plugin_playwright_playwright__browser_drag`             |
+| Upload a file                     | `mcp__plugin_playwright_playwright__browser_file_upload`      |
+| Read console messages / errors    | `mcp__plugin_playwright_playwright__browser_console_messages` |
+| Read network requests             | `mcp__plugin_playwright_playwright__browser_network_requests` |
+| Handle a `window.alert`/`confirm` | `mcp__plugin_playwright_playwright__browser_handle_dialog`    |
+| Resize viewport                   | `mcp__plugin_playwright_playwright__browser_resize`           |
+| Switch / open tab                 | `mcp__plugin_playwright_playwright__browser_tabs`             |
+| Wait for a condition              | `mcp__plugin_playwright_playwright__browser_wait_for`         |
+| Run arbitrary JS in the page      | `mcp__plugin_playwright_playwright__browser_evaluate`         |
+| Close the browser (end of run)    | `mcp__plugin_playwright_playwright__browser_close`            |
+
+### Two rules you must follow
+
+**1. Use `browser_snapshot` to get element refs, don't guess selectors.** `browser_snapshot` returns the accessibility tree
+with stable refs. Pass those refs to `browser_click`, `browser_type`, etc. Don't compose CSS selectors from memory — they
+drift and break.
+
+**2. Screenshots come back inline. Don't `Read` them afterwards.** `browser_take_screenshot` returns the image in the tool
+result directly. You already see it. Using the `Read` tool on the saved path re-loads the same bytes and wastes tokens.
+
+### Viewport presets
+
+For responsive checks, use these resize values:
+
+- Mobile: 375 × 812
+- Tablet: 768 × 1024
+- Desktop-mid: 1280 × 720
+- Desktop-large: 1920 × 1080
+
+### Auth caveat
+
+Playwright MCP starts a fresh browser per session — cookies and login state do NOT persist between runs. If the target
+requires auth, either script the login flow as part of Phase 8 or point the skill at a publicly-accessible staging URL.
+
 
 ---
 
@@ -381,7 +416,7 @@ Only commit if there are changes: `git commit -m "chore: bootstrap test framewor
 
    If no obvious routes: fall back to Quick mode — navigate homepage + top 5 nav targets, check console for errors.
 
-3. **Detect the running app:** Use computer_use to navigate to common local ports until one responds:
+3. **Detect the running app:** Use `browser_navigate` to navigate to common local ports until one responds:
    `http://localhost:3000`, `http://localhost:4000`, `http://localhost:8080`, `http://localhost:5173` If none found: check
    for staging/preview URL in the PR. If nothing, ask the user for the URL.
 
@@ -412,7 +447,7 @@ Run full mode, load `baseline.json` from previous run. Diff: which issues are fi
 
 ## Phase 1: Initialize
 
-1. Confirm browse tool (computer_use) is available
+1. Confirm Playwright MCP tools are available (try `browser_snapshot` on a blank page)
 2. Create output directories:
    ```bash
    mkdir -p .lyra/qa-reports/screenshots
@@ -437,14 +472,9 @@ Run full mode, load `baseline.json` from previous run. Diff: which issues are fi
 
 **If the user specified auth credentials:**
 
-```
-computer_use: navigate to login URL
-computer_use: screenshot the login form
-computer_use: click email field, type "user@example.com"
-computer_use: click password field, type "[REDACTED — never log real passwords]"
-computer_use: click submit button
-computer_use: screenshot — verify login succeeded
-```
+Use `browser_navigate` to go to the login URL. Call `browser_take_screenshot` to capture the login form. Use
+`browser_snapshot` to get refs for the email and password fields, then `browser_type` into each. Use `browser_snapshot` to
+find the submit button ref, then `browser_click` it. Call `browser_take_screenshot` to verify login succeeded.
 
 **If cookie file provided:** Import cookies via browser DevTools → Application → Cookies, then navigate to target.
 
@@ -458,14 +488,9 @@ computer_use: screenshot — verify login succeeded
 
 Get a map of the application:
 
-```
-computer_use: navigate to target URL
-computer_use: screenshot with annotation — save to .lyra/qa-reports/screenshots/initial.png
-computer_use: open DevTools console — screenshot for any landing errors
-computer_use: inspect all nav links — document each destination
-```
-
-Read the initial screenshot immediately so the user can see it.
+Use `browser_navigate` to go to the target URL. Call `browser_take_screenshot` — the image returns inline in the tool result
+so the user can see it immediately. Call `browser_console_messages` to read any console errors from the page load. Use
+`browser_snapshot` to get the accessibility tree; enumerate all nav links from the snapshot and document each destination.
 
 **Detect framework:**
 
@@ -482,11 +507,8 @@ Read the initial screenshot immediately so the user can see it.
 
 Visit pages systematically. At each page:
 
-```
-computer_use: navigate to page URL
-computer_use: screenshot annotated — save to .lyra/qa-reports/screenshots/{page-name}.png
-computer_use: open DevTools console — screenshot errors
-```
+Use `browser_navigate` to go to the page URL. Call `browser_take_screenshot` — the image returns inline in the tool result.
+Call `browser_console_messages` to read any console errors.
 
 Then follow the **Per-Page Exploration Checklist** from `references/issue-taxonomy.md`:
 
@@ -496,12 +518,8 @@ Then follow the **Per-Page Exploration Checklist** from `references/issue-taxono
 4. **Navigation** — all paths in/out, back button, deep links
 5. **States** — empty state, loading, error, overflow
 6. **Console** — any JS errors or failed requests after interactions
-7. **Responsiveness:**
-   ```
-   computer_use: resize browser to 375×812 (mobile)
-   computer_use: screenshot — save mobile screenshot
-   computer_use: resize browser to 1280×720
-   ```
+7. **Responsiveness:** Call `browser_resize` to 375×812 (mobile). Call `browser_take_screenshot` to capture the mobile
+   layout. Call `browser_resize` back to 1280×720.
 8. **Auth boundaries** — what happens when logged out? Different roles?
 
 **Depth judgment:** Spend more time on core features (homepage, dashboard, checkout, search) and less on secondary pages
@@ -515,20 +533,11 @@ Then follow the **Per-Page Exploration Checklist** from `references/issue-taxono
 
 Document each issue **immediately when found** — don't batch them.
 
-**Interactive bugs** (broken flows, dead buttons, form failures):
+**Interactive bugs** (broken flows, dead buttons, form failures): Call `browser_take_screenshot` before the action. Perform
+the action using the appropriate Playwright MCP tool (e.g. `browser_click`, `browser_type`). Call `browser_take_screenshot`
+to capture the result. Call `browser_console_messages` to capture any console errors.
 
-```
-computer_use: screenshot before action — save issue-NNN-step-1.png
-computer_use: perform the action
-computer_use: screenshot result — save issue-NNN-result.png
-computer_use: screenshot console — save issue-NNN-console.png
-```
-
-**Static bugs** (typos, layout issues, missing images):
-
-```
-computer_use: screenshot showing the problem — save issue-NNN.png
-```
+**Static bugs** (typos, layout issues, missing images): Call `browser_take_screenshot` showing the problem.
 
 **Write each issue to the report immediately** using the template format from `references/qa-report-template.md`.
 
@@ -750,13 +759,10 @@ For every fix, run the gate in order:
 
 **Gate Step 2 — RUN:** Execute the exact verification:
 
-```
-computer_use: navigate to the EXACT affected URL (fresh load, not cached)
-computer_use: reproduce the EXACT steps that triggered the bug
-computer_use: screenshot result — save issue-NNN-after.png
-computer_use: open DevTools console — screenshot for errors
-computer_use: if applicable — open Network tab, screenshot any failed requests
-```
+Use `browser_navigate` to go to the EXACT affected URL (fresh load, not cached). Reproduce the EXACT steps that triggered the
+bug using the appropriate Playwright MCP tools. Call `browser_take_screenshot` — the image returns inline in the tool result.
+Call `browser_console_messages` to check for errors. If applicable, call `browser_network_requests` to list any failed
+requests — no tab-switching needed.
 
 **Gate Step 3 — READ:** Look at the output fully.
 
@@ -902,7 +908,8 @@ If the repo has a `TODOS.md`:
 6. **Check console after every interaction.** JS errors that don't surface visually are still bugs.
 7. **Depth over breadth.** 5–10 well-documented issues with evidence > 20 vague descriptions.
 8. **Never delete output files.** Screenshots and reports accumulate — that's intentional.
-9. **Always show screenshots.** After every `computer_use` screenshot, use Read to display it inline.
+9. **Show screenshots inline** — `browser_take_screenshot` returns images directly in the tool result; do not re-`Read` saved
+   files.
 10. **Never refuse to use the browser.** When /lyra-qa is invoked, browser-based testing is the job. Even if the diff appears
     to have no UI changes, backend changes affect behavior — always open the browser and test.
 11. **Clean working tree required.** If dirty, use AskUserQuestion to offer commit/stash/abort.
