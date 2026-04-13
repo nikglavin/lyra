@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Lyra uninstall script
+# Usage: ./uninstall
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [ "$#" -gt 0 ]; then
+  echo "ERROR: uninstall takes no arguments (got: $*)" >&2
+  exit 2
+fi
+
+echo "Lyra uninstall"
+echo "  Repo: $REPO_ROOT"
+echo ""
+
+removed=0
+skipped=0
+
+# Resolve a path's real (canonical) location, or empty string on failure.
+resolve_real() {
+  local p="$1"
+  local dir base
+  dir="$(dirname "$p")"
+  base="$(basename "$p")"
+  if [ -d "$dir" ]; then
+    echo "$(cd "$dir" && pwd -P)/$base"
+  else
+    echo ""
+  fi
+}
+
+# Check whether a real path lies inside REPO_ROOT.
+inside_repo() {
+  local real="$1"
+  case "$real" in
+    "$REPO_ROOT"/*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+echo ""
+echo "Done. $removed link(s) removed, $skipped skipped."
+echo "Note: ~/.lyra clone (if any) was not touched. Remove it manually if desired."
