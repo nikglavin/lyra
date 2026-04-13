@@ -4,7 +4,19 @@ Lyra is a Claude Code skill library with a custom build system. Skills are autho
 `.agents/skills/`, and symlinked into `~/.claude/skills/` on install.
 
 Key directories: `skills/` (source), `.agents/skills/` (compiled, committed), `lib/` (shared partials), `scripts/`
-(build/lint tooling), `test/` (regression suite).
+(build/lint tooling), `test/` (regression suite), `.claude/agents/` (persona subagents that bundle skills).
+
+## Persona subagents
+
+`.claude/agents/` holds subagent definitions that bundle related skills for larger workflows:
+
+- `lyra-architect` — PM persona using `lyra-website-planning`, `lyra-prd-review`, `lyra-breadboard`
+- `lyra-designer` — UI/UX executor using all design skills (`lyra-ux-principles`, `lyra-brand-storytelling`,
+  `lyra-color-theory`, `lyra-typography-system`, `lyra-grid-system`, `lyra-responsive-design`, `lyra-design-system`)
+- `lyra-tester` — autonomous QA engine using `lyra-qa`
+
+Agent frontmatter uses YAML lists for `skills:` and Claude Code tool names (`Bash`, `Read`, `Write`, `Edit`, `Glob`, `Grep`,
+`AskUserQuestion`, `WebSearch`). Do not invent tool names.
 
 ---
 
@@ -48,7 +60,7 @@ When adding a skill with new template behavior, add a regression case to `test/b
 ## Naming conventions
 
 - Skill folder names: `lyra-<noun>` in kebab-case — the `lyra-` prefix scopes all skills to this library
-- Use `SKILL.md.tmpl` when the skill references any `{{lib/...}}` includes; use plain `SKILL.md` otherwise
+- Use `SKILL.tmpl.md` when the skill references any `{{lib/...}}` includes; use plain `SKILL.md` otherwise
 - Every skill body must include `{{lib/preflight/preflight.md}}` immediately after the frontmatter — this handles update
   checking
 - No `README.md` inside skill folders — documentation goes in `references/` or the repo root `README.md`
@@ -99,7 +111,7 @@ description: >
 ## Adding a new skill
 
 1. Create `skills/lyra-<noun>/`
-2. Add `SKILL.md.tmpl` with valid frontmatter
+2. Add `SKILL.tmpl.md` with valid frontmatter
 3. Add `{{lib/preflight/preflight.md}}` as the first line of the body
 4. Add any `scripts/`, `resources/`, `assets/`, or `references/` subdirectories as needed
 5. Run `bun run build` — verify output appears in `.agents/skills/lyra-<noun>/`

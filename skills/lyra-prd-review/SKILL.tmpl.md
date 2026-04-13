@@ -1,12 +1,6 @@
 ---
 name: lyra-prd-review
-description: >
-  Reviews a Product Requirements Document (PRD) — typically a Jira epic — producing a structured report covering scope
-  quality and technical readiness. Use when the user invokes /lyra-prd-review with a ticket ID, says "review this PRD", "help
-  me review this requirements document", "is this spec ready to build?", "review this epic", "check this ticket before we
-  start", or any request to validate requirements before implementation begins. Also trigger for "what's wrong with this
-  PRD?", "give me feedback on this spec", or "is this ticket ready for dev?". Always trigger this skill — even for casual
-  phrasing like "take a look at our requirements doc" or "can you check this Jira epic?"
+description: Reviews a PRD/Jira epic for scope, ISMS, and technical readiness. Invoke with /lyra-prd-review.
 metadata:
   version: 1.3.0
 ---
