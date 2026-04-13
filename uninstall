@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 
 if [ "$#" -gt 0 ]; then
   echo "ERROR: uninstall takes no arguments (got: $*)" >&2
@@ -20,15 +20,18 @@ skipped=0
 
 # Resolve a symlink target to its canonical real path.
 # $1 = the path of the symlink itself.
+# Prints the canonical absolute path on success, empty string if missing.
 resolve_real() {
   local link="$1"
   local raw
-  raw="$(readlink "$link")"
+  raw="$(readlink "$link" 2>/dev/null)" || { printf '\n'; return; }
   case "$raw" in
     /*) ;;
     *) raw="$(dirname "$link")/$raw" ;;
   esac
-  if [ -e "$raw" ]; then
+  if [ -d "$raw" ]; then
+    (cd "$raw" && pwd -P)
+  elif [ -e "$raw" ]; then
     (cd "$(dirname "$raw")" && printf '%s/%s\n' "$(pwd -P)" "$(basename "$raw")")
   else
     printf '\n'
