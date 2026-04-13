@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import { execSync } from "child_process";
-import { mkdtempSync, rmSync, lstatSync } from "fs";
+import { mkdtempSync, rmSync, lstatSync, mkdirSync, symlinkSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 
@@ -45,5 +45,40 @@ test("install + uninstall round-trip removes every skill symlink", () => {
 		expect(() => lstatSync(breadboard)).toThrow();
 	} finally {
 		rmSync(fakeHome, { recursive: true });
+	}
+});
+
+test("uninstall leaves real (non-symlink) directories alone", () => {
+	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
+	try {
+		const real = join(fakeHome, ".claude/skills/lyra-breadboard");
+		mkdirSync(real, { recursive: true });
+
+		const output = runUninstall(fakeHome);
+		expect(output).toContain("SKIP:");
+		expect(output).toContain("real directory");
+		expect(output).toContain(real);
+		expect(lstatSync(real).isDirectory()).toBe(true);
+		expect(lstatSync(real).isSymbolicLink()).toBe(false);
+	} finally {
+		rmSync(fakeHome, { recursive: true });
+	}
+});
+
+test("uninstall leaves symlinks pointing outside this repo alone", () => {
+	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
+	const foreignTarget = mkdtempSync(join(tmpdir(), "lyra-foreign-"));
+	try {
+		mkdirSync(join(fakeHome, ".claude/skills"), { recursive: true });
+		const link = join(fakeHome, ".claude/skills/lyra-breadboard");
+		symlinkSync(foreignTarget, link);
+
+		const output = runUninstall(fakeHome);
+		expect(output).toContain("SKIP:");
+		expect(output).toContain("symlink points outside this repo");
+		expect(lstatSync(link).isSymbolicLink()).toBe(true);
+	} finally {
+		rmSync(fakeHome, { recursive: true });
+		rmSync(foreignTarget, { recursive: true });
 	}
 });
