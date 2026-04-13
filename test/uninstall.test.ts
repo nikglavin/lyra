@@ -65,6 +65,20 @@ test("uninstall leaves real (non-symlink) directories alone", () => {
 	}
 });
 
+test("install + uninstall round-trip removes the shared/scripts symlink", () => {
+	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
+	try {
+		runInstall(fakeHome);
+		const sharedScripts = join(fakeHome, ".claude/shared/scripts");
+		expect(lstatSync(sharedScripts).isSymbolicLink()).toBe(true);
+
+		runUninstall(fakeHome);
+		expect(() => lstatSync(sharedScripts)).toThrow();
+	} finally {
+		rmSync(fakeHome, { recursive: true });
+	}
+});
+
 test("uninstall leaves symlinks pointing outside this repo alone", () => {
 	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
 	const foreignTarget = mkdtempSync(join(tmpdir(), "lyra-foreign-"));
@@ -80,5 +94,39 @@ test("uninstall leaves symlinks pointing outside this repo alone", () => {
 	} finally {
 		rmSync(fakeHome, { recursive: true });
 		rmSync(foreignTarget, { recursive: true });
+	}
+});
+
+test("uninstall leaves a foreign shared/scripts symlink alone", () => {
+	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
+	const foreignTarget = mkdtempSync(join(tmpdir(), "lyra-foreign-"));
+	try {
+		mkdirSync(join(fakeHome, ".claude/shared"), { recursive: true });
+		const link = join(fakeHome, ".claude/shared/scripts");
+		symlinkSync(foreignTarget, link);
+
+		const output = runUninstall(fakeHome);
+		expect(output).toContain("SKIP:");
+		expect(output).toContain("symlink points outside this repo");
+		expect(lstatSync(link).isSymbolicLink()).toBe(true);
+	} finally {
+		rmSync(fakeHome, { recursive: true });
+		rmSync(foreignTarget, { recursive: true });
+	}
+});
+
+test("uninstall leaves a real shared/scripts directory alone", () => {
+	const fakeHome = mkdtempSync(join(tmpdir(), "lyra-uninstall-"));
+	try {
+		const realDir = join(fakeHome, ".claude/shared/scripts");
+		mkdirSync(realDir, { recursive: true });
+
+		const output = runUninstall(fakeHome);
+		expect(output).toContain("SKIP:");
+		expect(output).toContain("real directory");
+		expect(lstatSync(realDir).isDirectory()).toBe(true);
+		expect(lstatSync(realDir).isSymbolicLink()).toBe(false);
+	} finally {
+		rmSync(fakeHome, { recursive: true });
 	}
 });

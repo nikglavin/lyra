@@ -80,6 +80,26 @@ if [ -d "$REPO_ROOT/.agents/skills" ]; then
   done
 fi
 
+# Remove ~/.claude/shared/scripts if it points into this repo.
+shared_scripts="$HOME/.claude/shared/scripts"
+if [ -L "$shared_scripts" ]; then
+  real="$(resolve_real "$shared_scripts")"
+  if [ -n "$real" ] && inside_repo "$real"; then
+    rm "$shared_scripts"
+    echo "Removed:  $shared_scripts"
+    removed=$((removed + 1))
+  else
+    echo "SKIP:     $shared_scripts — symlink points outside this repo"
+    skipped=$((skipped + 1))
+  fi
+elif [ -d "$shared_scripts" ]; then
+  echo "SKIP:     $shared_scripts — real directory, not removing"
+  skipped=$((skipped + 1))
+elif [ -e "$shared_scripts" ]; then
+  echo "SKIP:     $shared_scripts — not a symlink, not removing"
+  skipped=$((skipped + 1))
+fi
+
 echo ""
 echo "Done. $removed link(s) removed, $skipped skipped."
 echo "Note: ~/.lyra clone (if any) was not touched. Remove it manually if desired."
