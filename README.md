@@ -8,6 +8,17 @@ A skill library for [Claude Code](https://claude.ai/claude-code).
 curl -fsSL https://raw.githubusercontent.com/nikglavin/lyra/main/install | bash
 ```
 
+## Uninstall
+
+From a clone:
+
+```bash
+~/dev/lyra/uninstall
+```
+
+Removes the symlinks `install` created in `~/.claude/skills/` and `~/.claude/shared/`. Does not delete the clone directory or
+any real (non-symlink) files. Safe to run repeatedly.
+
 ## Skills
 
 | Skill                      | Description                                                                     |
