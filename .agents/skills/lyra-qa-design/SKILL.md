@@ -339,8 +339,6 @@ requires auth, either script the login flow as part of Phase 8 or point the skil
 
 ## Phase 7: Initialize output directory
 
-## Output Directory
-
 Skill artifacts are written to `.lyra/<skill-name>/` inside the project root, not the project root itself. This keeps
 generated files out of the way and clearly attributed to the skill that produced them.
 
