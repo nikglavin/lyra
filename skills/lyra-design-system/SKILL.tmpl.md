@@ -20,7 +20,7 @@ pushback.
 invite the user to adjust. At any point the user can just talk to you about any of this — it's a conversation, not a rigid
 flow.
 
-## Phase 0 — Pre-checks
+## Phase 0: Pre-checks
 
 Before engaging the user:
 
@@ -32,7 +32,7 @@ Before engaging the user:
 - If the codebase is empty and the product purpose is unclear, say: _"I don't have a clear picture of what you're building
   yet. Want to describe it first, or should I proceed from what I can see?"_
 
-## Phase 0.5 — Reference URL Analysis (if provided)
+## Phase 0.5: Reference URL analysis (if provided)
 
 If the user provides a reference URL at any point:
 
@@ -54,7 +54,7 @@ If the user provides a reference URL at any point:
 
 3. Treat the Blueprint as explicit layout truth in Phase 3 (Proposal).
 
-## Phase 1 — Product Context
+## Phase 1: Product context
 
 Ask ONE consolidated `AskUserQuestion` that covers everything you need. Pre-fill from Phase 0 where possible.
 
@@ -69,7 +69,7 @@ The question covers:
 If Phase 0 gathered enough context, pre-fill the confirmation: _"From what I can see, this is [X] for [Y] in the [Z] space.
 Sound right? And would you like me to research what's out there in this space, or should I work from what I know?"_
 
-## Phase 2 — Research (opt-in)
+## Phase 2: Research (opt-in)
 
 Only runs if the user said yes in Phase 1.
 
@@ -98,7 +98,7 @@ assume [assumption]. But this product's users [evidence] — so we should do Y i
 
 **Graceful degradation:** Playwright MCP + WebSearch → WebSearch only → built-in design knowledge.
 
-## Phase 2.5 — Adversarial Review
+## Phase 2.5: Adversarial review
 
 Dispatch a subagent via the `Agent` tool (`subagent_type: general-purpose`) with a prompt that includes the Phase 1 product
 context and (if present) the Phase 2 Visual Gap insight:
@@ -108,7 +108,7 @@ context and (if present) the Phase 2 Visual Gap insight:
 
 Use the response to strengthen the Phase 3 proposal or carry it forward as a "wild alternative" option in Phase 3.
 
-## Phase 3 — The Complete Proposal
+## Phase 3: The complete proposal
 
 Present everything as one coherent package via a single `AskUserQuestion`:
 
@@ -145,58 +145,16 @@ different ones? Or adjust anything else?
 options (surface the Phase 2.5 adversarial proposal here if not already used). D) Start over with a different direction. E)
 Skip previews, write DESIGN.md directly.
 
-### Design Knowledge (use to inform proposals — do NOT display as tables)
+### Design knowledge (use to inform proposals — do NOT display as tables)
 
-**Aesthetic directions:**
+{{lib/design-knowledge/design-knowledge.md}}
 
-- Brutally Minimal — Type and whitespace only. No decoration. Modernist.
-- Maximalist Chaos — Dense, layered, pattern-heavy. Y2K meets contemporary.
-- Retro-Futuristic — Vintage tech nostalgia. CRT glow, pixel grids, warm monospace.
-- Luxury/Refined — Serifs, high contrast, generous whitespace, precious metals.
-- Playful/Toy-like — Rounded, bouncy, bold primaries. Approachable and fun.
-- Editorial/Magazine — Strong typographic hierarchy, asymmetric grids, pull quotes.
-- Brutalist/Raw — Exposed structure, system fonts, visible grid, no polish.
-- Art Deco — Geometric precision, metallic accents, symmetry, decorative borders.
-- Organic/Natural — Earth tones, rounded forms, hand-drawn texture, grain.
-- Industrial/Utilitarian — Function-first, data-dense, monospace accents, muted palette.
+### AI slop anti-patterns (never include in recommendations)
 
-**Decoration levels:** minimal (typography does all the work) / intentional (subtle texture, grain, background treatment) /
-expressive (full creative direction, layered depth, patterns).
+The shared Lyra slop checklist applies here. Use it as a hard negative filter on your proposal — if any of your
+recommendations match a `slop:*` pattern, swap it out before presenting.
 
-**Layout approaches:** grid-disciplined / creative-editorial / hybrid.
-
-**Color approaches:** restrained (1 accent + neutrals) / balanced (primary + secondary + semantic) / expressive (color as a
-primary design tool).
-
-**Motion approaches:** minimal-functional / intentional / expressive.
-
-**Font recommendations by purpose:**
-
-- Display/Hero: Satoshi, General Sans, Instrument Serif, Fraunces, Clash Grotesk, Cabinet Grotesk
-- Body: Instrument Sans, DM Sans, Source Sans 3, Geist, Plus Jakarta Sans, Outfit
-- Data/Tables: Geist (tabular-nums), DM Sans (tabular-nums), JetBrains Mono, IBM Plex Mono
-- Code: JetBrains Mono, Fira Code, Berkeley Mono, Geist Mono
-
-**Font blacklist** (never recommend): Papyrus, Comic Sans, Lobster, Impact, Jokerman, Bleeding Cowboys, Permanent Marker,
-Bradley Hand, Brush Script, Hobo, Trajan, Raleway, Clash Display, Courier New (for body).
-
-**Overused fonts** (never recommend as primary — use only if user specifically requests): Inter, Roboto, Arial, Helvetica,
-Open Sans, Lato, Montserrat, Poppins.
-
-**Iconography options:** Lucide (line, friendly) / Heroicons (line + solid, UI-focused) / Phosphor (line + fill variants,
-editorial-friendly) / Tabler (line, dense). Single library per product. One style (line OR solid). Consistent stroke width.
-
-**AI slop anti-patterns** (never include in recommendations):
-
-- Purple/violet gradients as default accent
-- 3-column feature grid with icons in colored circles
-- Centered everything with uniform spacing
-- Uniform bubbly border-radius on all elements
-- Gradient buttons as the primary CTA pattern
-- Generic stock-photo-style hero sections
-- "Built for X" / "Designed for Y" marketing copy patterns
-- Abstract blob / gradient-orb hero imagery
-- Glassmorphism backdrop-blur navbars with no information density
+{{lib/ai-slop/ai-slop.md}}
 
 ### Coherence Validation
 
@@ -211,7 +169,7 @@ When the user overrides one section, check if the rest still coheres. Flag misma
 
 Always accept the user's final choice.
 
-## Phase 4 — Drill-downs (only if user requests adjustments)
+## Phase 4: Drill-downs (only if user requests adjustments)
 
 When the user picks option B in Phase 3, go deep on the requested section. Each drill-down is one focused `AskUserQuestion`.
 After the user decides, re-run the Coherence Validation check from Phase 3.
@@ -227,7 +185,7 @@ After the user decides, re-run the Coherence Validation check from Phase 3.
   validation approach; recommend one set.
 - **Imagery:** photography vs illustration direction with treatment options (filters, duotone, grain) and a do-not-use list.
 
-## Phase 5 — Visual Previews
+## Phase 5: Visual previews
 
 Generate **two** self-contained HTML files in `.design/` so the user can compare artifacts. Skip entirely if the user picked
 Phase 3 option E.
@@ -289,7 +247,7 @@ Then tell the user:
 
 If `open` fails (headless environment), print both paths and tell the user to open them manually.
 
-## Phase 6 — Write `.design/DESIGN.md` and update `CLAUDE.md`
+## Phase 6: Write `.design/DESIGN.md` and update `CLAUDE.md`
 
 Write `.design/DESIGN.md` using this exact schema. Fill every bracketed placeholder with the actual decision from Phase 3 (or
 Phase 4 if the user adjusted). Never leave a placeholder.
