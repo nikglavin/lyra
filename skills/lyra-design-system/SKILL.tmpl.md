@@ -81,8 +81,6 @@ Only runs if the user said yes in Phase 1.
 structural data. For each site, analyze: fonts actually used, color palette, layout approach, spacing density, aesthetic
 direction. Skip sites that block headless browsers or require login.
 
-If Playwright MCP is unavailable, rely on `WebSearch` results plus built-in design knowledge.
-
 **Step 3 — Three-layer synthesis**:
 
 - **Layer 1 (tried and true):** shared patterns across the category — table stakes.
@@ -281,6 +279,8 @@ After writing both files, run:
 open .design/moodboard.html .design/preview.html
 ```
 
+(`open` is the macOS command; on Linux the fallback branch below applies.)
+
 Then tell the user:
 
 > "Two previews in `.design/`: `moodboard.html` (Lyra's editorial showcase) and `preview.html` (gstack-style preview page).
@@ -433,8 +433,8 @@ doesn't match .design/DESIGN.md.
 ```
 
 **Idempotency:** before appending, read `CLAUDE.md` and check whether a `## Design System` section already exists. If it
-does, replace that section in-place rather than appending a duplicate. If `CLAUDE.md` doesn't exist, create it with just this
-block.
+does, replace from that `## Design System` heading up to the next `## ` heading (or EOF, whichever comes first) in-place
+rather than appending a duplicate. If `CLAUDE.md` doesn't exist, create it with just this block.
 
 ### Final confirmation
 
