@@ -1,3 +1,57 @@
+# lyra-design-system v3.0.0 Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or
+> superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Rewrite `skills/lyra-design-system/SKILL.tmpl.md` to v3.0.0 — a gstack-style `design-consultation` flow that
+preserves every distinctive Lyra piece and adds component-level sections for Iconography, Buttons, Form Design, and Imagery
+to the generated `DESIGN.md` schema.
+
+**Architecture:** Single-file rewrite. The entire existing `SKILL.tmpl.md` is replaced. The file uses Lyra's existing
+`{{lib/preflight/preflight.md}}` transclusion convention; no new `lib/` modules are introduced. Lyra's build pipeline
+(`bun scripts/build.ts`) regenerates `.agents/skills/lyra-design-system/SKILL.md` from the template.
+
+**Tech Stack:** Markdown templates, Lyra build scripts (`bun scripts/build.ts`, `bun scripts/lint-skill.ts`), `oxfmt` for
+formatting.
+
+**Reference spec:** `docs/superpowers/specs/2026-04-15-lyra-design-system-gstack-mimic-design.md`
+
+---
+
+## File Structure
+
+**Modified:**
+
+- `skills/lyra-design-system/SKILL.tmpl.md` — full rewrite. Template source; frontmatter sets `version: 3.0.0`. Transcludes
+  `{{lib/preflight/preflight.md}}`. Contains the phased flow (Phases 0 → 6), design-knowledge reference blocks, safe/risk
+  framing, coherence validation, two-artifact Phase 5, extended `DESIGN.md` schema, `CLAUDE.md` update logic, merged hard-
+  constraints footer.
+
+**Regenerated (by build, not hand-edited):**
+
+- `.agents/skills/lyra-design-system/SKILL.md` — produced automatically by `bun scripts/build.ts` from the new template.
+  Never touched manually.
+
+**Untouched:**
+
+- Every other file in the repository. Sibling skills, `lib/`, build scripts, existing specs, and `CLAUDE.md` files in the
+  skill's user projects are all out of scope.
+
+---
+
+## Task 1: Rewrite `SKILL.tmpl.md` to v3.0.0
+
+**Files:**
+
+- Modify: `skills/lyra-design-system/SKILL.tmpl.md` (full rewrite)
+
+- [ ] **Step 1: Overwrite the template with the new v3.0.0 content**
+
+Use the `Write` tool to replace `skills/lyra-design-system/SKILL.tmpl.md` with the full content below (inside the 5-backtick
+fence). This is the entire file — every byte. Do not merge with existing content. Note: the embedded content itself contains
+4-backtick fences around the DESIGN.md schema — that is intentional and must be preserved verbatim in the file body.
+
+````markdown
 ---
 name: lyra-design-system
 description: >
@@ -20,7 +74,7 @@ pushback.
 invite the user to adjust. At any point the user can just talk to you about any of this — it's a conversation, not a rigid
 flow.
 
-## Phase 0: Pre-checks
+## Phase 0 — Pre-checks
 
 Before engaging the user:
 
@@ -32,7 +86,7 @@ Before engaging the user:
 - If the codebase is empty and the product purpose is unclear, say: _"I don't have a clear picture of what you're building
   yet. Want to describe it first, or should I proceed from what I can see?"_
 
-## Phase 0.5: Reference URL analysis (if provided)
+## Phase 0.5 — Reference URL Analysis (if provided)
 
 If the user provides a reference URL at any point:
 
@@ -54,7 +108,7 @@ If the user provides a reference URL at any point:
 
 3. Treat the Blueprint as explicit layout truth in Phase 3 (Proposal).
 
-## Phase 1: Product context
+## Phase 1 — Product Context
 
 Ask ONE consolidated `AskUserQuestion` that covers everything you need. Pre-fill from Phase 0 where possible.
 
@@ -69,7 +123,7 @@ The question covers:
 If Phase 0 gathered enough context, pre-fill the confirmation: _"From what I can see, this is [X] for [Y] in the [Z] space.
 Sound right? And would you like me to research what's out there in this space, or should I work from what I know?"_
 
-## Phase 2: Research (opt-in)
+## Phase 2 — Research (opt-in)
 
 Only runs if the user said yes in Phase 1.
 
@@ -80,6 +134,8 @@ Only runs if the user said yes in Phase 1.
 `mcp__plugin_playwright_playwright__browser_navigate`, then `browser_take_screenshot` for the feel and `browser_snapshot` for
 structural data. For each site, analyze: fonts actually used, color palette, layout approach, spacing density, aesthetic
 direction. Skip sites that block headless browsers or require login.
+
+If Playwright MCP is unavailable, rely on `WebSearch` results plus built-in design knowledge.
 
 **Step 3 — Three-layer synthesis**:
 
@@ -98,7 +154,7 @@ assume [assumption]. But this product's users [evidence] — so we should do Y i
 
 **Graceful degradation:** Playwright MCP + WebSearch → WebSearch only → built-in design knowledge.
 
-## Phase 2.5: Adversarial review
+## Phase 2.5 — Adversarial Review
 
 Dispatch a subagent via the `Agent` tool (`subagent_type: general-purpose`) with a prompt that includes the Phase 1 product
 context and (if present) the Phase 2 Visual Gap insight:
@@ -108,7 +164,7 @@ context and (if present) the Phase 2 Visual Gap insight:
 
 Use the response to strengthen the Phase 3 proposal or carry it forward as a "wild alternative" option in Phase 3.
 
-## Phase 3: The complete proposal
+## Phase 3 — The Complete Proposal
 
 Present everything as one coherent package via a single `AskUserQuestion`:
 
@@ -145,16 +201,58 @@ different ones? Or adjust anything else?
 options (surface the Phase 2.5 adversarial proposal here if not already used). D) Start over with a different direction. E)
 Skip previews, write DESIGN.md directly.
 
-### Design knowledge (use to inform proposals — do NOT display as tables)
+### Design Knowledge (use to inform proposals — do NOT display as tables)
 
-{{lib/design-knowledge/design-knowledge.md}}
+**Aesthetic directions:**
 
-### AI slop anti-patterns (never include in recommendations)
+- Brutally Minimal — Type and whitespace only. No decoration. Modernist.
+- Maximalist Chaos — Dense, layered, pattern-heavy. Y2K meets contemporary.
+- Retro-Futuristic — Vintage tech nostalgia. CRT glow, pixel grids, warm monospace.
+- Luxury/Refined — Serifs, high contrast, generous whitespace, precious metals.
+- Playful/Toy-like — Rounded, bouncy, bold primaries. Approachable and fun.
+- Editorial/Magazine — Strong typographic hierarchy, asymmetric grids, pull quotes.
+- Brutalist/Raw — Exposed structure, system fonts, visible grid, no polish.
+- Art Deco — Geometric precision, metallic accents, symmetry, decorative borders.
+- Organic/Natural — Earth tones, rounded forms, hand-drawn texture, grain.
+- Industrial/Utilitarian — Function-first, data-dense, monospace accents, muted palette.
 
-The shared Lyra slop checklist applies here. Use it as a hard negative filter on your proposal — if any of your
-recommendations match a `slop:*` pattern, swap it out before presenting.
+**Decoration levels:** minimal (typography does all the work) / intentional (subtle texture, grain, background treatment) /
+expressive (full creative direction, layered depth, patterns).
 
-{{lib/ai-slop/ai-slop.md}}
+**Layout approaches:** grid-disciplined / creative-editorial / hybrid.
+
+**Color approaches:** restrained (1 accent + neutrals) / balanced (primary + secondary + semantic) / expressive (color as a
+primary design tool).
+
+**Motion approaches:** minimal-functional / intentional / expressive.
+
+**Font recommendations by purpose:**
+
+- Display/Hero: Satoshi, General Sans, Instrument Serif, Fraunces, Clash Grotesk, Cabinet Grotesk
+- Body: Instrument Sans, DM Sans, Source Sans 3, Geist, Plus Jakarta Sans, Outfit
+- Data/Tables: Geist (tabular-nums), DM Sans (tabular-nums), JetBrains Mono, IBM Plex Mono
+- Code: JetBrains Mono, Fira Code, Berkeley Mono, Geist Mono
+
+**Font blacklist** (never recommend): Papyrus, Comic Sans, Lobster, Impact, Jokerman, Bleeding Cowboys, Permanent Marker,
+Bradley Hand, Brush Script, Hobo, Trajan, Raleway, Clash Display, Courier New (for body).
+
+**Overused fonts** (never recommend as primary — use only if user specifically requests): Inter, Roboto, Arial, Helvetica,
+Open Sans, Lato, Montserrat, Poppins.
+
+**Iconography options:** Lucide (line, friendly) / Heroicons (line + solid, UI-focused) / Phosphor (line + fill variants,
+editorial-friendly) / Tabler (line, dense). Single library per product. One style (line OR solid). Consistent stroke width.
+
+**AI slop anti-patterns** (never include in recommendations):
+
+- Purple/violet gradients as default accent
+- 3-column feature grid with icons in colored circles
+- Centered everything with uniform spacing
+- Uniform bubbly border-radius on all elements
+- Gradient buttons as the primary CTA pattern
+- Generic stock-photo-style hero sections
+- "Built for X" / "Designed for Y" marketing copy patterns
+- Abstract blob / gradient-orb hero imagery
+- Glassmorphism backdrop-blur navbars with no information density
 
 ### Coherence Validation
 
@@ -169,7 +267,7 @@ When the user overrides one section, check if the rest still coheres. Flag misma
 
 Always accept the user's final choice.
 
-## Phase 4: Drill-downs (only if user requests adjustments)
+## Phase 4 — Drill-downs (only if user requests adjustments)
 
 When the user picks option B in Phase 3, go deep on the requested section. Each drill-down is one focused `AskUserQuestion`.
 After the user decides, re-run the Coherence Validation check from Phase 3.
@@ -185,7 +283,7 @@ After the user decides, re-run the Coherence Validation check from Phase 3.
   validation approach; recommend one set.
 - **Imagery:** photography vs illustration direction with treatment options (filters, duotone, grain) and a do-not-use list.
 
-## Phase 5: Visual previews
+## Phase 5 — Visual Previews
 
 Generate **two** self-contained HTML files in `.design/` so the user can compare artifacts. Skip entirely if the user picked
 Phase 3 option E.
@@ -237,8 +335,6 @@ After writing both files, run:
 open .design/moodboard.html .design/preview.html
 ```
 
-(`open` is the macOS command; on Linux the fallback branch below applies.)
-
 Then tell the user:
 
 > "Two previews in `.design/`: `moodboard.html` (Lyra's editorial showcase) and `preview.html` (gstack-style preview page).
@@ -247,7 +343,7 @@ Then tell the user:
 
 If `open` fails (headless environment), print both paths and tell the user to open them manually.
 
-## Phase 6: Write `.design/DESIGN.md` and update `CLAUDE.md`
+## Phase 6 — Write `.design/DESIGN.md` and update `CLAUDE.md`
 
 Write `.design/DESIGN.md` using this exact schema. Fill every bracketed placeholder with the actual decision from Phase 3 (or
 Phase 4 if the user adjusted). Never leave a placeholder.
@@ -391,8 +487,8 @@ doesn't match .design/DESIGN.md.
 ```
 
 **Idempotency:** before appending, read `CLAUDE.md` and check whether a `## Design System` section already exists. If it
-does, replace from that `## Design System` heading up to the next `## ` heading (or EOF, whichever comes first) in-place
-rather than appending a duplicate. If `CLAUDE.md` doesn't exist, create it with just this block.
+does, replace that section in-place rather than appending a duplicate. If `CLAUDE.md` doesn't exist, create it with just this
+block.
 
 ### Final confirmation
 
@@ -429,3 +525,127 @@ After shipping, suggest follow-ups:
 11. **NEVER use generic SVGs without pulling exact paths** from Lucide, Heroicons, Phosphor, or Tabler.
 12. **Always ensure design decisions follow the emotional brief** (diffuse shadows for soft/premium, raw borders for utility,
     etc.).
+````
+
+Note: the outer fence in this plan uses 5 backticks so the embedded file's 4-backtick fences (around the `DESIGN.md` schema
+and `CLAUDE.md` block) render correctly. When writing the real file, preserve the inner 4-backtick fences exactly — they are
+part of the file body.
+
+**Important:** The `Write` tool receives the content between the outer ```` markers above as the literal file body.
+
+- [ ] **Step 2: Run `oxfmt` on the new file**
+
+Run:
+
+```bash
+bunx oxfmt skills/lyra-design-system/SKILL.tmpl.md
+```
+
+Expected: `Finished in Xms on 1 files`. The formatter may rewrap prose lines — that's fine, it's idempotent and the
+subsequent lint run will confirm the file still parses.
+
+- [ ] **Step 3: Run the skill lint**
+
+Run:
+
+```bash
+bun scripts/lint-skill.ts
+```
+
+Expected: `✅ All skills passed structural validation!`
+
+If it fails, read the error, fix the template, and re-run. Common failure modes: missing `name:` in frontmatter, malformed
+YAML, missing `# lyra-design-system` heading.
+
+- [ ] **Step 4: Run the build**
+
+Run:
+
+```bash
+bun scripts/build.ts
+```
+
+Expected output includes `Built (1): lyra-design-system` (or similar — the script prints which skills were rebuilt because
+their source template changed). It should NOT say `Unchanged (13)` — if it does, the template hash didn't change and the
+Write didn't land.
+
+- [ ] **Step 5: Spot-check the generated output**
+
+Run:
+
+```bash
+head -40 .agents/skills/lyra-design-system/SKILL.md
+```
+
+Expected: frontmatter shows `version: 3.0.0`. The preflight block is inlined (from `{{lib/preflight/preflight.md}}`). The
+top-of-body posture text starts with "You are a senior product designer".
+
+Then:
+
+```bash
+grep -c "^## Phase" .agents/skills/lyra-design-system/SKILL.md
+```
+
+Expected: `7` (Phases 0, 0.5, 1, 2, 2.5, 3, 4, 5, 6 — that's 9 `## Phase` headings; some are `## Phase 0.5` etc.). Actually
+run this first and adjust the expectation to match what `grep -c '^## Phase '` returns against your file; the important
+assertion is that multiple phase headings are present, not the exact count.
+
+Run:
+
+```bash
+grep -c "^## Iconography\|^## Buttons\|^## Form Design\|^## Imagery" .agents/skills/lyra-design-system/SKILL.md
+```
+
+Expected: `4` — confirms all four new DESIGN.md sections made it through the build.
+
+- [ ] **Step 6: Run the full format check**
+
+Run:
+
+```bash
+bunx oxfmt --check
+```
+
+Expected: `All matched files use the correct format.`
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add skills/lyra-design-system/SKILL.tmpl.md .agents/skills/lyra-design-system/SKILL.md
+git commit -m "$(cat <<'EOF'
+feat(lyra-design-system): rewrite as gstack-style design consultation v3.0.0
+
+Adopt gstack design-consultation phased flow (Phases 0-6), consultant posture,
+SAFE/RISK framing, coherence validation, and three-layer research synthesis.
+Preserve Lyra keepsakes: preflight include, Reference URL Analysis, Adversarial
+Review subagent, moodboard.html artifact.
+
+Phase 5 now emits both .design/moodboard.html and .design/preview.html for
+side-by-side comparison. Phase 6 writes an extended DESIGN.md with new
+Iconography / Buttons / Form Design / Imagery sections and idempotently updates
+project CLAUDE.md to make the system load-bearing.
+
+Spec: docs/superpowers/specs/2026-04-15-lyra-design-system-gstack-mimic-design.md
+EOF
+)"
+```
+
+Expected: pre-commit hooks pass (oxfmt, tsc, oxlint, lint-sh, build, lint-skill). A single commit lands. If any hook fails,
+read the error, fix the template, re-stage, and create a new commit (never amend).
+
+---
+
+## Self-Review Checklist
+
+Before marking the plan complete, the executing engineer should verify:
+
+- [ ] `.agents/skills/lyra-design-system/SKILL.md` was regenerated (not unchanged) by `bun scripts/build.ts`.
+- [ ] The frontmatter `version` reads `3.0.0`.
+- [ ] The file contains headings for Phase 0, Phase 0.5, Phase 1, Phase 2, Phase 2.5, Phase 3, Phase 4, Phase 5, Phase 6.
+- [ ] The DESIGN.md schema block contains sections for: Product Context, Aesthetic Direction, Typography, Color, Spacing,
+      Layout, Motion, **Iconography**, **Buttons**, **Form Design**, **Imagery**, Signature Move, Anti-Persona Guardrails,
+      Safe vs Risk Decisions, Decisions Log.
+- [ ] Phase 5 references both `moodboard.html` AND `preview.html` and instructs opening both.
+- [ ] Phase 6 describes the idempotent `CLAUDE.md` append (check for existing `## Design System` section before writing).
+- [ ] The Anti-patterns footer contains all 12 rules.
+- [ ] `git status` is clean after the commit.
