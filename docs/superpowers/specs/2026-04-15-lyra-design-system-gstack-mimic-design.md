@@ -24,7 +24,8 @@ into that shape. During Phase 5, the skill generates **both** Lyra's existing `.
 3. Produce both preview artifacts (`moodboard.html` and `preview.html`) in Phase 5 so the operator can directly compare
    Lyra's current visual deliverable against gstack's preview format.
 4. Adopt gstack's full `DESIGN.md` schema as the canonical format Lyra writes, extended with Lyra's existing "Signature Move"
-   and "Anti-Persona Guardrails" sections.
+   and "Anti-Persona Guardrails" sections and with new component-level sections for Iconography, Buttons, Form Design, and
+   Imagery — the operational details a downstream implementer actually needs.
 5. Make the design system load-bearing in future sessions by appending a Design System block to the project's `CLAUDE.md`
    (matching gstack's behavior), pointing at `.design/DESIGN.md`.
 
@@ -185,6 +186,10 @@ COLOR: [approach] + proposed palette (hex values) — [rationale]
 TYPOGRAPHY: [3 font recommendations with roles] — [why these fonts]
 SPACING: [base unit + density] — [rationale]
 MOTION: [approach] — [rationale]
+ICONOGRAPHY: [library + style + stroke] — [why this set fits]
+BUTTONS: [hierarchy sketch — primary/secondary/ghost radius, weight, fill] — [rationale]
+FORMS: [input style + label position + validation approach] — [rationale]
+IMAGERY: [photography/illustration direction + treatment] — [rationale]
 
 This system is coherent because [explain how choices reinforce each other].
 
@@ -240,6 +245,12 @@ Adopts gstack Phase 4 verbatim. Triggered when the user picks option B in Phase 
 - **Colors**: 2–3 palette options with hex values; explain the color theory reasoning.
 - **Aesthetic**: walk through which directions fit the product and why.
 - **Layout / Spacing / Motion**: present the approaches with concrete tradeoffs for the product type.
+- **Iconography**: 2–3 library candidates (Lucide / Heroicons / Phosphor / Tabler) with style and stroke-width tradeoffs;
+  rule out mixing libraries.
+- **Buttons**: 2–3 hierarchy treatments with concrete specs (radius, weight, fill vs outline, hover behavior); recommend one.
+- **Forms**: input style options (filled / outlined / underlined), label position options (above / floating / inline),
+  validation approach; recommend one set.
+- **Imagery**: photography vs illustration direction options with treatment (filters, duotone, grain) and do-not-use list.
 
 Each drill-down is one focused `AskUserQuestion`. After the user decides, re-run the Coherence Validation check from Phase 3
 against the updated proposal.
@@ -267,8 +278,17 @@ an external dependency.
   Product name as the hero heading, not Lorem Ipsum.
 - **Font specimen section**: each font candidate shown in its proposed role (hero, body, button label, data table row);
   side-by-side comparison if multiple candidates per role; real content matching the product.
-- **Color palette section**: swatches with hex values and names; sample UI components in the palette — buttons (primary,
-  secondary, ghost), cards, form inputs, alerts (success, warning, error, info); background/text pairings showing contrast.
+- **Color palette section**: swatches with hex values and names; background/text pairings showing contrast.
+- **Iconography section**: the chosen icon library rendered at every size in the scale (xs–xl), shown inline with text,
+  inside a button, and as a standalone status indicator — all using the specified stroke width.
+- **Button section**: full hierarchy (primary, secondary, ghost, destructive) at all sizes (sm / md / lg), each rendered in
+  every interactive state (default, hover, active, disabled, loading), plus at least one icon-only button example.
+- **Form section**: a complete form block — text input, textarea, select, checkbox, radio, toggle switch — shown in default,
+  focused, filled, disabled, and error states, with labels, helper text, required markers, and validation messages matching
+  the spec.
+- **Imagery section**: 3–4 sample images (or placeholders if none yet) applied with the specified treatment, radius, and
+  aspect ratios — hero, card, avatar, thumbnail.
+- **Alerts**: success, warning, error, info — using the semantic palette.
 - **Realistic product mockups**: 2–3 realistic page layouts based on the Phase 1 project type:
   - Dashboard / web app: data table with metrics, sidebar nav, header with user avatar, stat cards.
   - Marketing site: hero with real copy, feature highlights, testimonial, CTA.
@@ -352,6 +372,56 @@ Guardrails" sections:
 - **Approach:** [minimal-functional / intentional / expressive]
 - **Easing:** enter(ease-out) exit(ease-in) move(ease-in-out)
 - **Duration:** micro(50-100ms) short(150-250ms) medium(250-400ms) long(400-700ms)
+
+## Iconography
+
+- **Library:** [Lucide / Heroicons / Phosphor / Tabler / custom] — single source, no mixing
+- **Style:** [line / solid / duotone] — one style across the product
+- **Stroke width:** [value — must be consistent across the set, e.g., 1.5px]
+- **Sizes:** xs(12) sm(16) md(20) lg(24) xl(32) — tied to the spacing scale
+- **Color rules:** [when icons inherit `currentColor`, when they take semantic color, when they take brand color]
+- **Usage:** [where icons are allowed — nav, buttons, inline with text, status indicators — and where they are not]
+- **Rationale:** [why this library fits the aesthetic]
+
+## Buttons
+
+- **Hierarchy:** primary / secondary / ghost / destructive — describe visual weight of each
+- **Primary spec:** background [hex], text [hex], border [hex or none], radius [px], padding [y×x], font [family + weight +
+  size], hover state, active state, disabled state
+- **Secondary spec:** [same fields]
+- **Ghost spec:** [same fields]
+- **Destructive spec:** [same fields]
+- **Sizes:** sm / md / lg — height and padding for each
+- **Icon buttons:** sizing rules, when icon-only is allowed, accessibility label requirements
+- **Loading state:** [spinner / skeleton / label swap + pattern]
+- **Rationale:** [why this button system expresses the aesthetic]
+
+## Form Design
+
+- **Input style:** [filled / outlined / underlined] — one primary style across the product
+- **Input spec:** background [hex], border [hex + width], radius [px], padding, font, placeholder color, focus ring [color +
+  offset + width]
+- **Label position:** [above / floating / inline] — with rationale
+- **Helper text:** position, color, typography
+- **Validation:** error color [hex], error message pattern, success indicator, inline vs on-submit
+- **Required fields:** how they're marked (asterisk / "required" label / optional-only marking)
+- **Disabled state:** background, text opacity, cursor rule
+- **Field grouping:** spacing between fields, fieldset treatment, section dividers
+- **Form layout:** single column default, when multi-column is allowed, max input width
+- **Rationale:** [why this form system fits the product's trust and density requirements]
+
+## Imagery
+
+- **Photography style:** [editorial / documentary / stock / illustrated / none] — with mood descriptors
+- **Illustration style:** [if used — flat / isometric / hand-drawn / geometric / none]
+- **Treatment:** [filters, overlays, duotone rules, grain, desaturation percentages]
+- **Aspect ratios:** [allowed ratios for hero, card, avatar, thumbnail]
+- **Border radius:** [per image role — e.g., cards md, avatars full, hero none]
+- **Cropping rules:** [focal point guidance, face/subject placement]
+- **Placeholder strategy:** [while loading — blur-up, skeleton, solid color, LQIP]
+- **Do not use:** [explicit list — e.g., no generic stock business-handshake photography, no AI- generated faces, no cliché
+  gradient-orb hero art]
+- **Rationale:** [why this imagery direction reinforces the brand voice]
 
 ## Signature Move
 
