@@ -82,11 +82,14 @@
 
 For each page visited during a QA session:
 
-1. **Visual scan** — Take annotated screenshot via computer_use. Look for layout issues, broken images, alignment.
-2. **Interactive elements** — Click every button, link, and control. Does each do what it says?
-3. **Forms** — Fill and submit. Test empty submission, invalid data, edge cases (long text, special characters).
+1. **Visual scan** — Take a full-page screenshot via `browser_take_screenshot`. Look for layout issues, broken images,
+   alignment.
+2. **Interactive elements** — Click every button, link, and control via `browser_click` (use `browser_snapshot` first to get
+   element refs). Does each do what it says?
+3. **Forms** — Fill (`browser_type` or `browser_fill_form`) and submit. Test empty submission, invalid data, edge cases (long
+   text, special characters).
 4. **Navigation** — Check all paths in/out. Breadcrumbs, back button, deep links, mobile menu.
 5. **States** — Check empty state, loading state, error state, full/overflow state.
-6. **Console** — Screenshot DevTools console after interactions. Any new JS errors or failed requests?
-7. **Responsiveness** — Check 375×812 mobile and 1280×720 desktop viewports.
+6. **Console** — Call `browser_console_messages` after interactions. Any new JS errors or failed requests?
+7. **Responsiveness** — `browser_resize` to 375×812 (mobile) and 1280×720 (desktop); take a screenshot at each.
 8. **Auth boundaries** — What happens when logged out? Different user roles?

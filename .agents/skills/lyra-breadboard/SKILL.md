@@ -16,8 +16,6 @@ If output contains `SKILLS_UPDATE_AVAILABLE`: use AskUserQuestion to ask if they
 `lyra-update` skill.
 
 
-## Output Directory
-
 Skill artifacts are written to `.lyra/<skill-name>/` inside the project root, not the project root itself. This keeps
 generated files out of the way and clearly attributed to the skill that produced them.
 
