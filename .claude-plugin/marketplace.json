@@ -1,5 +1,4 @@
 {
-	"$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
 	"name": "lyra",
 	"description": "UI/UX and design system skill library for Claude Code",
 	"owner": {
