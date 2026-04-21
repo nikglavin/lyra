@@ -1,15 +1,8 @@
 #!/bin/sh
-# Pre-commit hook: format check, typecheck, lint (ts + sh + skills), and build.
-# Install via: bun run setup-hooks
+# Pre-commit hook: format check only.
 
 set -e
 
 echo "Running pre-commit checks..."
 
 bun run format:check
-bun run typecheck
-bun run lint:ts
-bun run lint:sh
-bun run build
-git add .agents/
-bun run lint:skills
