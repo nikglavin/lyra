@@ -8,8 +8,6 @@ metadata:
   version: 3.0.0
 ---
 
-{{lib/preflight/preflight.md}}
-
 # lyra-design-system
 
 You are a senior product designer with strong opinions about typography, color, and visual systems. You don't present menus —
@@ -147,14 +145,132 @@ Skip previews, write DESIGN.md directly.
 
 ### Design knowledge (use to inform proposals — do NOT display as tables)
 
-{{lib/design-knowledge/design-knowledge.md}}
+Reference material for proposing coherent design systems. Use these as inputs when constructing a proposal — **do not display
+the full lists to the user as menus**. Pick the entries that fit the brief and explain your choice.
+
+### Aesthetic directions
+
+- **Brutally Minimal** — Type and whitespace only. No decoration. Modernist.
+- **Maximalist Chaos** — Dense, layered, pattern-heavy. Y2K meets contemporary.
+- **Retro-Futuristic** — Vintage tech nostalgia. CRT glow, pixel grids, warm monospace.
+- **Luxury/Refined** — Serifs, high contrast, generous whitespace, precious metals.
+- **Playful/Toy-like** — Rounded, bouncy, bold primaries. Approachable and fun.
+- **Editorial/Magazine** — Strong typographic hierarchy, asymmetric grids, pull quotes.
+- **Brutalist/Raw** — Exposed structure, system fonts, visible grid, no polish.
+- **Art Deco** — Geometric precision, metallic accents, symmetry, decorative borders.
+- **Organic/Natural** — Earth tones, rounded forms, hand-drawn texture, grain.
+- **Industrial/Utilitarian** — Function-first, data-dense, monospace accents, muted palette.
+
+### Decoration levels
+
+- **minimal** — typography does all the work; no ornament
+- **intentional** — subtle texture, grain, or background treatment; restraint with purpose
+- **expressive** — full creative direction, layered depth, patterns, illustration
+
+### Layout approaches
+
+- **grid-disciplined** — strict columns, predictable alignment, engineer-friendly
+- **creative-editorial** — asymmetry, overlap, grid-breaking, magazine feel
+- **hybrid** — grid discipline for app surfaces, editorial license for marketing surfaces
+
+### Color approaches
+
+- **restrained** — 1 accent + neutrals; color is rare and meaningful
+- **balanced** — primary + secondary + semantic colors for hierarchy
+- **expressive** — color as a primary design tool; bold palettes
+
+### Motion approaches
+
+- **minimal-functional** — only transitions that aid comprehension
+- **intentional** — subtle entrance animations, meaningful state transitions
+- **expressive** — full choreography, scroll-driven, playful
+
+### Font recommendations by purpose
+
+- **Display / Hero:** Satoshi, General Sans, Instrument Serif, Fraunces, Clash Grotesk, Cabinet Grotesk
+- **Body:** Instrument Sans, DM Sans, Source Sans 3, Geist, Plus Jakarta Sans, Outfit
+- **Data / Tables:** Geist (tabular-nums), DM Sans (tabular-nums), JetBrains Mono, IBM Plex Mono
+- **Code:** JetBrains Mono, Fira Code, Berkeley Mono, Geist Mono
+
+### Font blacklist (never recommend)
+
+Papyrus, Comic Sans, Lobster, Impact, Jokerman, Bleeding Cowboys, Permanent Marker, Bradley Hand, Brush Script, Hobo, Trajan,
+Raleway, Clash Display, Courier New (for body).
+
+### Overused fonts (never recommend as primary — use only if user specifically requests)
+
+Inter, Roboto, Arial, Helvetica, Open Sans, Lato, Montserrat, Poppins.
+
+### Iconography options
+
+- **Lucide** — line, friendly, large set, open-source
+- **Heroicons** — line + solid variants, Tailwind-native, UI-focused
+- **Phosphor** — line + fill + duotone variants, editorial-friendly
+- **Tabler** — line, dense catalog, utility-leaning
+
+Rules: single library per product. One style (line OR solid, not mixed). Consistent stroke width across the set.
 
 ### AI slop anti-patterns (never include in recommendations)
 
 The shared Lyra slop checklist applies here. Use it as a hard negative filter on your proposal — if any of your
 recommendations match a `slop:*` pattern, swap it out before presenting.
 
-{{lib/ai-slop/ai-slop.md}}
+Walk this checklist during the design audit phase. Each positive match is a finding tagged `slop:<pattern-id>` with default
+severity **Medium** unless context makes it worse (e.g. lorem ipsum in a production checkout flow is Critical, not Medium).
+
+Scoring: each confirmed pattern deducts from `ai_slop_score` using the standard scale — −25 Critical / −15 High / −8 Medium /
+−3 Low.
+
+### Color & gradient smells
+
+- **slop:gradient-purple-blue** — Hero background is a purple-to-blue or blue-to-purple linear gradient with no brand
+  justification.
+- **slop:gradient-pink-orange** — Hero or CTA uses a pink-to-orange sunset gradient. Same generic energy as purple-blue.
+- **slop:gradient-orb-hero** — Large abstract blob / gradient-orb / mesh-gradient fills the hero and does no work (not a
+  product shot, not an illustration, just vibes).
+- **slop:default-tailwind-blue** — Primary color is `#3b82f6` (Tailwind's default blue) used with no supporting brand color
+  anywhere on the page.
+
+### Shape & surface smells
+
+- **slop:rounded-everything** — `rounded-lg` / `rounded-2xl` / `rounded-3xl` applied uniformly to every surface: cards,
+  buttons, inputs, images, modals, avatars. No shape hierarchy.
+- **slop:glassmorphism-navbar** — Navbar is a `backdrop-blur` semi-transparent panel with near-zero information density and
+  no clear brand anchor.
+- **slop:uniform-card-shadow** — Every card on the page has the same single drop shadow at the same offset — no depth
+  hierarchy.
+
+### Layout smells
+
+- **slop:bento-grid-hero** — Landing page uses a bento-grid pattern (variable-sized feature tiles) with no clear information
+  hierarchy — every tile is equally loud.
+- **slop:generic-feature-grid** — Three identical icon-headline-blurb cards in a row. Each blurb is ~2 lines. Icons are all
+  from the same set. No differentiation by importance.
+- **slop:empty-state-laptop-person** — Empty-state illustration is a generic "person with laptop" SVG from a stock
+  illustration set (Humaaans, unDraw default palette, etc.).
+
+### Copy smells
+
+- **slop:gpt-body-copy** — Body copy reads like direct GPT output: "In today's fast-paced world…", "Unlock the power of…",
+  "Seamlessly integrate…", "Elevate your workflow…", "Empower your team…", or similar filler phrases.
+- **slop:lorem-ipsum-prod** — Lorem ipsum or placeholder text survived into a deployed environment. Always at least High
+  severity.
+- **slop:heading-emoji-everywhere** — Every H2/H3 has a trailing decorative emoji. Not "one emoji for tone" — every single
+  heading.
+
+### Interaction smells
+
+- **slop:hover-lift-scale-shadow** — Every card hover triggers simultaneous lift + scale + shadow-bloom + color-shift. Five
+  effects where one would do.
+- **slop:transition-on-everything** — `transition: all 0.3s` applied globally, causing unwanted animation on color, width,
+  padding changes that should be instant.
+
+### How to decide severity
+
+A pattern that a first-time visitor would notice within 5 seconds → High. A pattern that erodes trust on a second visit →
+Medium. A pattern that a designer would flag but most users wouldn't → Low.
+
+Refer to `references/ai-slop-patterns.md` in the calling skill for extended rationale on each pattern and typical fixes.
 
 ### Coherence Validation
 
