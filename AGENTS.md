@@ -1,69 +1,47 @@
 # Lyra — Agent Guide
 
-Lyra is a Claude Code skill library with a custom build system. Skills are authored in `skills/`, compiled to
-`.agents/skills/`, and symlinked into `~/.claude/skills/` on install.
+Lyra is a Claude Code plugin for UI/UX and design system skills. Skills live in `skills/`, agents live in `agents/`. The
+plugin is installed via `/plugin install lyra@lyra` — no build step, no symlinks.
 
-Key directories: `skills/` (source), `.agents/skills/` (compiled, committed), `lib/` (shared partials), `scripts/`
-(build/lint tooling), `test/` (regression suite), `.claude/agents/` (persona subagents that bundle skills).
+Key directories:
+
+- `skills/` — skill source files (`SKILL.md`), one folder per skill
+- `agents/` — persona subagent definitions that bundle related skills
+- `.claude-plugin/` — plugin metadata (`plugin.json`, `marketplace.json`)
 
 ## Persona subagents
 
-`.claude/agents/` holds subagent definitions that bundle related skills for larger workflows:
+`agents/` holds subagent definitions that bundle related skills for larger workflows:
 
 - `lyra-architect` — PM persona using `lyra-website-planning`, `lyra-prd-review`, `lyra-breadboard`
 - `lyra-designer` — UI/UX executor using all design skills (`lyra-ux-principles`, `lyra-brand-storytelling`,
   `lyra-color-theory`, `lyra-typography-system`, `lyra-grid-system`, `lyra-responsive-design`, `lyra-design-system`)
 - `lyra-tester` — autonomous QA engine using `lyra-qa`
 
-Agent frontmatter uses YAML lists for `skills:` and Claude Code tool names (`Bash`, `Read`, `Write`, `Edit`, `Glob`, `Grep`,
-`AskUserQuestion`, `WebSearch`). Do not invent tool names.
+Agent files are plain Markdown with YAML frontmatter. Frontmatter fields: `name`, `description`, `tools` (comma-separated
+Claude Code tool names), `model`, `skills` (YAML list), `color`. Do not invent tool names.
 
 ---
 
-## Build system
+## No build system
 
-- Source files: `skills/<name>/SKILL.md.tmpl` (when using includes) or `SKILL.md` (plain)
-- `{{lib/path/to/file.md}}` tokens in `.tmpl` files are resolved by `scripts/build.ts` and inlined
-- Output lands in `.agents/skills/<name>/SKILL.md` — commit this directory
-- Resource subdirectories (`scripts/`, `resources/`, `assets/`, `references/`) are mirrored verbatim into the output skill
-  folder
-- Path traversal in include paths is rejected at build time — `../../` escapes will throw
-- After any change to `skills/` or `lib/`, run:
+There is no build step. Skills are plain `SKILL.md` files — no `.tmpl` files, no `{{lib/...}}` includes, no preflight macro.
+Edit `skills/<name>/SKILL.md` directly.
+
+Formatting only:
 
 ```
-bun run build
+bun run format        # write
+bun run format:check  # check only (runs in CI)
 ```
 
 ---
 
-## Testing and validation
+## Adding a new skill
 
-```
-bun test              # full test suite (test/)
-```
-
-`scripts/lint-skill.ts` validates every compiled skill:
-
-- Folder name is kebab-case
-- `SKILL.md` exists (exact casing)
-- YAML frontmatter is valid with `---` delimiters
-- `name` and `description` fields are present
-- No forbidden characters (XML angle brackets)
-
-The pre-commit hook (`scripts/bash/pre-commit.sh`) runs in order: `format:check` → `typecheck` → lint → `build` → skill lint.
-Do not skip it.
-
-When adding a skill with new template behavior, add a regression case to `test/build.test.ts`.
-
----
-
-## Naming conventions
-
-- Skill folder names: `lyra-<noun>` in kebab-case — the `lyra-` prefix scopes all skills to this library
-- Use `SKILL.tmpl.md` when the skill references any `{{lib/...}}` includes; use plain `SKILL.md` otherwise
-- Every skill body must include `{{lib/preflight/preflight.md}}` immediately after the frontmatter — this handles update
-  checking
-- No `README.md` inside skill folders — documentation goes in `references/` or the repo root `README.md`
+1. Create `skills/lyra-<noun>/`
+2. Add `SKILL.md` with valid frontmatter (see below)
+3. Commit — no build required
 
 ---
 
@@ -78,7 +56,9 @@ description: >
   What it does. Use when user says "...", "...", or asks to "...".
 
 
-# allowed-tools: "Bash(python:*) WebFetch"   # optional
+# allowed-tools:
+#   - Bash
+#   - Read
 # metadata:
 #   author: your-name
 #   version: 1.0.0
@@ -88,7 +68,7 @@ description: >
 - `name`: kebab-case only, no spaces or capitals, never prefixed with `claude` or `anthropic`
 - `description`: must state WHAT the skill does AND WHEN to trigger it (specific user phrases); max 1024 chars; no XML angle
   brackets
-- `allowed-tools`: restrict when the skill should not access arbitrary tools
+- `allowed-tools`: restrict when the skill should not access arbitrary tools (YAML list)
 
 ### Instructions body
 
@@ -108,12 +88,15 @@ description: >
 
 ---
 
-## Adding a new skill
+## Naming conventions
 
-1. Create `skills/lyra-<noun>/`
-2. Add `SKILL.tmpl.md` with valid frontmatter
-3. Add `{{lib/preflight/preflight.md}}` as the first line of the body
-4. Add any `scripts/`, `resources/`, `assets/`, or `references/` subdirectories as needed
-5. Run `bun run build` — verify output appears in `.agents/skills/lyra-<noun>/`
-6. Run `bun test` — add a regression case to `test/build.test.ts` if new template behavior is introduced
-7. Test triggering: ask Claude "when would you use lyra-\<noun\>?" and confirm the description covers expected phrases
+- Skill folder names: `lyra-<noun>` in kebab-case — the `lyra-` prefix scopes all skills to this library
+- No `README.md` inside skill folders — documentation goes in `references/` or the repo root `README.md`
+
+---
+
+## Plugin metadata
+
+`.claude-plugin/plugin.json` — name, description, author. Edit when repo identity changes.
+
+`.claude-plugin/marketplace.json` — marketplace schema for `/plugin install`. Edit when publishing a new plugin entry.
