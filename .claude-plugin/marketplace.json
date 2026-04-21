@@ -1,0 +1,17 @@
+{
+	"$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+	"name": "lyra",
+	"description": "UI/UX and design system skill library for Claude Code",
+	"owner": {
+		"name": "Nick Glavin",
+		"url": "https://github.com/nikglavin"
+	},
+	"plugins": [
+		{
+			"name": "lyra",
+			"description": "UI/UX and design system skill library — design systems, color theory, typography, responsive design, QA, and more.",
+			"source": "./",
+			"category": "design"
+		}
+	]
+}
