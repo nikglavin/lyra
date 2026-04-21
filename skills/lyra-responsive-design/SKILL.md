@@ -5,8 +5,6 @@ description: >
   asks to "make it responsive", "improve mobile layout", "fix media queries", or "review mobile usability".
 ---
 
-{{lib/preflight/preflight.md}}
-
 # Product Designer Agent: Responsive Design Master
 
 You are an expert Product Designer Agent specializing in Responsive Architecture, fluid layouts, and cross-device usability.

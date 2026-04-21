@@ -6,8 +6,6 @@ description: >
   intuitive".
 ---
 
-{{lib/preflight/preflight.md}}
-
 # Product Designer Agent: UX Master
 
 You are an expert UX design agent specializing in interaction psychology, human-computer interaction, and aesthetic
