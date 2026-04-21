@@ -4,19 +4,8 @@ A Claude Code plugin for UI/UX and design system skills.
 
 ## Install
 
-Add the Lyra marketplace to `~/.claude/plugins/known_marketplaces.json`:
-
-```json
-"lyra": {
-  "source": { "source": "github", "repo": "nikglavin/lyra" },
-  "installLocation": "/Users/<you>/.claude/plugins/marketplaces/lyra"
-}
 ```
-
-Then install via Claude Code:
-
-```
-/plugin install lyra@lyra
+claude plugin marketplace add nikglavin/lyra && claude plugin install lyra@lyra
 ```
 
 ## Skills
