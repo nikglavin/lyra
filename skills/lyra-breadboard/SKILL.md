@@ -5,10 +5,6 @@ metadata:
   version: 1.0.0
 ---
 
-{{"lib/preflight/preflight.md"}}
-
-{{"lib/output-dir/output-dir.md"}}
-
 # Breadboarding & Logic Mapping
 
 Turn a vague idea into a numbered, labeled screen flow that a designer and engineer can work from in parallel. The output is

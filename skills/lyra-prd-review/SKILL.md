@@ -5,10 +5,6 @@ metadata:
   version: 1.3.0
 ---
 
-{{"lib/preflight/preflight.md"}}
-
-{{"lib/output-dir/output-dir.md"}}
-
 ## Invocation Modes
 
 This skill supports two output modes:
