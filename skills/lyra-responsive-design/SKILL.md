@@ -1,5 +1,6 @@
 ---
 name: lyra-responsive-design
+user-invocable: false
 description: >
   Expert Product Designer Agent that creates, modifies, and reviews HTML/CSS responsive design systems. Use when the user
   asks to "make it responsive", "improve mobile layout", "fix media queries", or "review mobile usability".

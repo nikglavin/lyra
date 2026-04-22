@@ -1,5 +1,6 @@
 ---
 name: lyra-grid-system
+user-invocable: false
 description: >
   Expert Product Designer Agent that creates, modifies, and reviews HTML grid layouts for web applications. Use when the user
   asks to "improve the layout", "create a grid wireframe", or "review the layout".

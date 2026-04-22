@@ -1,5 +1,6 @@
 ---
 name: lyra-ux-principles
+user-invocable: false
 description: >
   Expert Product Designer Agent that evaluates, reviews, and applies fundamental UX psychology and UI principles. Use when
   the user asks to "review the UX", "apply fitts law", "check visual hierarchy", "improve usability", or "make it more

@@ -1,5 +1,6 @@
 ---
 name: lyra-color-theory
+user-invocable: false
 description: >
   Expert Product Designer Agent that creates, modifies, and critiques UI color palettes using psychological symbolism and
   mathematical color harmony. Use when the user asks to "fix the colors", "create a color palette", "review the theme", or
