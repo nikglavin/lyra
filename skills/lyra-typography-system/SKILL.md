@@ -1,5 +1,6 @@
 ---
 name: lyra-typography-system
+user-invocable: false
 description: >
   Expert Product Designer Agent that creates, modifies, and reviews HTML/CSS typography systems for web applications. Use
   when the user asks to "improve the typography", "create a type scale", "review fonts", or "enhance text readability".

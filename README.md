@@ -13,17 +13,22 @@ claude plugin marketplace add nikglavin/lyra && claude plugin install lyra@lyra
 | Skill                      | Description                                                                     |
 | -------------------------- | ------------------------------------------------------------------------------- |
 | `/lyra-brand-storytelling` | Create and critique brand architecture, style guides, and UX narrative flows    |
-| `/lyra-breadboard`         | Turn a vague app idea into a lightweight structural screen flow                 |
-| `/lyra-color-theory`       | Create and critique UI color palettes using color psychology and harmony        |
 | `/lyra-design-system`      | Establish visual identity, token architecture, and aesthetic direction for a UI |
-| `/lyra-grid-system`        | Create and review HTML grid layouts for web applications                        |
-| `/lyra-prd-review`         | Review a PRD or Jira epic for scope, ISMS, and technical readiness              |
 | `/lyra-qa`                 | Autonomous QA engineer — tests, finds bugs, fixes them, and re-verifies         |
 | `/lyra-qa-design`          | Visual QA agent — audits live web apps with a designer's eye                    |
-| `/lyra-responsive-design`  | Create and review HTML/CSS responsive design systems and media queries          |
-| `/lyra-typography-system`  | Create and review typography systems, type scales, and font pairings            |
-| `/lyra-ux-principles`      | Evaluate and apply UX psychology, Fitts's Law, and visual hierarchy principles  |
 | `/lyra-website-planning`   | Architect web platforms with PRDs, customer journey maps, and user personas     |
+
+### Sub-skills
+
+Used internally by agents. Not user-invocable.
+
+| Skill                    | Agent           | Role                                                       |
+| ------------------------ | --------------- | ---------------------------------------------------------- |
+| `lyra-color-theory`      | `lyra-designer` | Color palettes, psychology, harmony, and WCAG contrast     |
+| `lyra-grid-system`       | `lyra-designer` | Column grids, 8pt spacing, and layout structure            |
+| `lyra-responsive-design` | `lyra-designer` | Mobile-first CSS, fluid layouts, and breakpoints           |
+| `lyra-typography-system` | `lyra-designer` | Type scales, reading ergonomics, and fluid sizing          |
+| `lyra-ux-principles`     | `lyra-designer` | Fitts's Law, Gestalt, visual hierarchy, and cognitive load |
 
 ## Agents
 

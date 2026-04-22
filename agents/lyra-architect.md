@@ -5,8 +5,6 @@ tools: Read, AskUserQuestion, WebSearch
 model: inherit
 skills:
   - lyra-website-planning
-  - lyra-prd-review
-  - lyra-breadboard
 color: purple
 ---
 
