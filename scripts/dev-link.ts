@@ -5,9 +5,26 @@ const PLUGINS_JSON = resolve(process.env.HOME!, ".claude/plugins/installed_plugi
 const PLUGIN_KEY = "lyra@lyra";
 const DEV_REPO = resolve(import.meta.dir, "..");
 
+if (!process.env.HOME) {
+	console.error("HOME environment variable not set");
+	process.exit(1);
+}
+
 const filePath = process.argv[2] ?? PLUGINS_JSON;
 
-const data = JSON.parse(readFileSync(filePath, "utf8"));
+let data: { version: number; plugins: Record<string, Array<{ installPath: string; _devOriginalInstallPath?: string }>> };
+try {
+	data = JSON.parse(readFileSync(filePath, "utf8"));
+} catch {
+	console.error(`Invalid JSON in ${filePath}`);
+	process.exit(1);
+}
+
+if (typeof data.plugins !== "object" || data.plugins === null) {
+	console.error(`Invalid structure in ${filePath}: plugins is not an object`);
+	process.exit(1);
+}
+
 const entries: Array<{ installPath: string; _devOriginalInstallPath?: string }> = data.plugins?.[PLUGIN_KEY];
 
 if (!entries?.length) {
