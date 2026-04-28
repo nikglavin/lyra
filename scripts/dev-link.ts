@@ -16,8 +16,9 @@ const filePath = process.argv[2] ?? PLUGINS_JSON;
 let data: { version: number; plugins: Record<string, Array<{ installPath: string; _devOriginalInstallPath?: string }>> };
 try {
 	data = JSON.parse(readFileSync(filePath, "utf8"));
-} catch {
-	console.error(`Invalid JSON in ${filePath}`);
+} catch (e: unknown) {
+	const msg = (e as NodeJS.ErrnoException).code === "ENOENT" ? `File not found: ${filePath}` : `Invalid JSON in ${filePath}`;
+	console.error(msg);
 	process.exit(1);
 }
 
@@ -38,6 +39,11 @@ const entry = entries[0];
 if (entry.installPath === DEV_REPO) {
 	console.log("Already linked.");
 	process.exit(0);
+}
+
+if (entry._devOriginalInstallPath) {
+	console.error("Already linked to a different path. Run dev:unlink first.");
+	process.exit(1);
 }
 
 entry._devOriginalInstallPath = entry.installPath;

@@ -65,7 +65,8 @@ test("removes _devOriginalInstallPath field after unlinking", () => {
 
 test("no-op if not linked", () => {
 	writeFileSync(tmpPath, JSON.stringify(makeUnlinkedFixture()));
-	run(tmpPath);
+	const result = run(tmpPath);
+	expect(result.exitCode).toBe(0);
 	const data = JSON.parse(readFileSync(tmpPath, "utf8"));
 	expect(data.plugins["lyra@lyra"][0].installPath).toBe(ORIGINAL_PATH);
 	expect(data.plugins["lyra@lyra"][0]._devOriginalInstallPath).toBeUndefined();

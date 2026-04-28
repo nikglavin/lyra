@@ -49,7 +49,8 @@ test("stores original path in _devOriginalInstallPath", () => {
 
 test("no-op if already linked", () => {
 	writeFileSync(tmpPath, JSON.stringify(makeFixture(DEV_REPO)));
-	run(tmpPath);
+	const result = run(tmpPath);
+	expect(result.exitCode).toBe(0);
 	const data = JSON.parse(readFileSync(tmpPath, "utf8"));
 	expect(data.plugins["lyra@lyra"][0].installPath).toBe(DEV_REPO);
 	expect(data.plugins["lyra@lyra"][0]._devOriginalInstallPath).toBeUndefined();

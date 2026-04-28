@@ -15,8 +15,9 @@ const filePath = process.argv[2] ?? PLUGINS_JSON;
 let data: { version: number; plugins: Record<string, Array<{ installPath: string; _devOriginalInstallPath?: string }>> };
 try {
 	data = JSON.parse(readFileSync(filePath, "utf8"));
-} catch {
-	console.error(`Invalid JSON in ${filePath}`);
+} catch (e: unknown) {
+	const msg = (e as NodeJS.ErrnoException).code === "ENOENT" ? `File not found: ${filePath}` : `Invalid JSON in ${filePath}`;
+	console.error(msg);
 	process.exit(1);
 }
 
