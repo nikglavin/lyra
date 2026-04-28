@@ -4,7 +4,10 @@
 	"description": "A Claude Code plugin for UI/UX and design system skills",
 	"scripts": {
 		"format:check": "oxfmt --check",
-		"format": "oxfmt --write"
+		"format": "oxfmt --write",
+		"test": "bun test",
+		"dev:link": "bun scripts/dev-link.ts",
+		"dev:unlink": "bun scripts/dev-unlink.ts"
 	},
 	"devDependencies": {
 		"oxfmt": "^0.42.0"
