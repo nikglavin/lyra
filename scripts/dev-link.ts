@@ -1,7 +1,6 @@
 import { readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
 
-const PLUGINS_JSON = resolve(process.env.HOME!, ".claude/plugins/installed_plugins.json");
 const PLUGIN_KEY = "lyra@lyra";
 const DEV_REPO = resolve(import.meta.dir, "..");
 
@@ -9,6 +8,8 @@ if (!process.env.HOME) {
 	console.error("HOME environment variable not set");
 	process.exit(1);
 }
+
+const PLUGINS_JSON = resolve(process.env.HOME, ".claude/plugins/installed_plugins.json");
 
 const filePath = process.argv[2] ?? PLUGINS_JSON;
 
