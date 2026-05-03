@@ -1,8 +1,10 @@
 {
 	"name": "lyra",
-	"description": "UI/UX and design system skill library for Claude Code. Skills for design systems, color theory, typography, responsive design, QA, and more.",
-	"author": {
-		"name": "Nick Glavin",
-		"url": "https://github.com/nikglavin"
-	}
+	"skills": [
+		"./skills/design/lyra-brand-storytelling",
+		"./skills/design/lyra-design-system",
+		"./skills/design/lyra-qa",
+		"./skills/design/lyra-qa-design",
+		"./skills/design/lyra-website-planning"
+	]
 }

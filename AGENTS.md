@@ -1,102 +1,46 @@
-# Lyra — Agent Guide
+# Lyra — Project Rules
 
-Lyra is a Claude Code plugin for UI/UX and design system skills. Skills live in `skills/`, agents live in `agents/`. The
-plugin is installed via `/plugin install lyra@lyra` — no build step, no symlinks.
+Skills are organized into bucket folders under `skills/`:
 
-Key directories:
+- `design/` — UI/UX, design systems, visual QA
+- `code/` — daily code work
+- `workflow/` — daily non-code workflow tools
+- `personal/` — tied to my own setup, not promoted
+- `deprecated/` — no longer used
 
-- `skills/` — skill source files (`SKILL.md`), one folder per skill
-- `agents/` — persona subagent definitions that bundle related skills
-- `.claude-plugin/` — plugin metadata (`plugin.json`, `marketplace.json`)
+Every skill in `design/`, `code/`, or `workflow/` must have a reference in the top-level `README.md` and an entry in
+`.claude-plugin/plugin.json`. Skills in `personal/` and `deprecated/` must not appear in either.
 
-## Persona subagents
+Each skill entry in the top-level `README.md` must link the skill name to its `SKILL.md`.
 
-`agents/` holds subagent definitions that bundle related skills for larger workflows:
+Each bucket folder that contains skills has a `README.md` that lists every skill in the bucket with a one-line description,
+with the skill name linked to its `SKILL.md`. Empty bucket folders are not created.
 
-- `lyra-architect` — PM persona using `lyra-website-planning`, `lyra-prd-review`, `lyra-breadboard`
-- `lyra-designer` — UI/UX executor using all design skills (`lyra-ux-principles`, `lyra-brand-storytelling`,
-  `lyra-color-theory`, `lyra-typography-system`, `lyra-grid-system`, `lyra-responsive-design`, `lyra-design-system`)
-- `lyra-tester` — autonomous QA engine using `lyra-qa`
-
-Agent files are plain Markdown with YAML frontmatter. Frontmatter fields: `name`, `description`, `tools` (comma-separated
-Claude Code tool names), `model`, `skills` (YAML list), `color`. Do not invent tool names.
-
----
-
-## No build system
-
-There is no build step. Skills are plain `SKILL.md` files — no `.tmpl` files, no `{{lib/...}}` includes, no preflight macro.
-Edit `skills/<name>/SKILL.md` directly.
-
-Formatting only:
+## Layout
 
 ```
-bun run format        # write
-bun run format:check  # check only (runs in CI)
+skills/<bucket>/<skill-name>/SKILL.md
 ```
 
----
+The skill folder may contain bundled resources (`references/`, `scripts/`) next to `SKILL.md`.
 
-## Adding a new skill
+## Adding a skill
 
-1. Create `skills/lyra-<noun>/`
-2. Add `SKILL.md` with valid frontmatter (see below)
-3. Commit — no build required
+1. `mkdir -p skills/<bucket>/<skill-name>/`
+2. Add `SKILL.md` with valid frontmatter (`name`, `description`).
+3. If the bucket is `design`, `code`, or `workflow`: add a row to the top-level `README.md` Reference section, add the path
+   to `.claude-plugin/plugin.json` `skills` array, and update the bucket `README.md`.
+4. Re-run `bun run link` so the new skill resolves under `~/.claude/skills/`.
 
----
+## Scripts
 
-## SKILL.md authoring rules
+- `bun run link` — symlink every `skills/**/SKILL.md` parent dir into `~/.claude/skills/<name>/` for live local development.
+- `bun run list` — print every `SKILL.md` path, sorted, relative to the repo root.
+- `bun run format` / `bun run format:check` — oxfmt over the repo.
 
-### Frontmatter
+## Distribution
 
-```yaml
----
-name: lyra-my-skill # kebab-case, matches folder name
-description: >
-  What it does. Use when user says "...", "...", or asks to "...".
-
-
-# allowed-tools:
-#   - Bash
-#   - Read
-# metadata:
-#   author: your-name
-#   version: 1.0.0
----
-```
-
-- `name`: kebab-case only, no spaces or capitals, never prefixed with `claude` or `anthropic`
-- `description`: must state WHAT the skill does AND WHEN to trigger it (specific user phrases); max 1024 chars; no XML angle
-  brackets
-- `allowed-tools`: restrict when the skill should not access arbitrary tools (YAML list)
-
-### Instructions body
-
-- Put the most critical constraints at the top — Claude reads top-down
-- Use numbered lists for sequential steps, bullets for options or parallel items
-- Add an explicit error handling section for likely failure modes
-- Use `## Important` or `## Critical` headers for must-follow rules
-- Keep `SKILL.md` under ~5,000 words; move detailed reference material to `references/` and link to it
-- Be specific: `Run python scripts/validate.py --input {filename}` not "validate the data"
-- For deterministic checks, bundle a script in `scripts/` rather than relying on prose instructions
-
-### Triggering
-
-- Vague descriptions → under-triggering; overly broad descriptions → over-triggering
-- Include domain synonyms and paraphrased user phrases in `description`
-- Add negative triggers when needed: `Do NOT use for X (use lyra-other-skill instead)`
-
----
-
-## Naming conventions
-
-- Skill folder names: `lyra-<noun>` in kebab-case — the `lyra-` prefix scopes all skills to this library
-- No `README.md` inside skill folders — documentation goes in `references/` or the repo root `README.md`
-
----
-
-## Plugin metadata
-
-`.claude-plugin/plugin.json` — name, description, author. Edit when repo identity changes.
-
-`.claude-plugin/marketplace.json` — marketplace schema for `/plugin install`. Edit when publishing a new plugin entry.
+- **Consumers (multi-agent)**: `npx skills@latest add nikglavin/lyra` — copies skills into the right folder for ~50 different
+  agents.
+- **Claude Code marketplace**: `claude plugin marketplace add nikglavin/lyra && claude plugin install lyra@lyra`.
+- **Local development (Claude Code only)**: `bun run link` — symlink-based, edits are live.
