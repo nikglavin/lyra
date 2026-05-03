@@ -352,10 +352,9 @@ mkdir -p "$OUTPUT_DIR/screenshots"
 Also copy the report template so the final report starts from the right skeleton:
 
 ```bash
-_TMPL=$(find ~/.claude/skills -path "*/lyra-qa-design/references/design-report-template.md" 2>/dev/null | head -1)
-[ -z "$_TMPL" ] && _TMPL=$(find . -path "*/lyra-qa-design/references/design-report-template.md" 2>/dev/null | head -1)
+_TMPL="{BASE_DIR}/references/design-report-template.md"
 _REPORT_FILE="$OUTPUT_DIR/report-$(date +%Y-%m-%d).md"
-[ -n "$_TMPL" ] && cp "$_TMPL" "$_REPORT_FILE" && echo "TEMPLATE: $_REPORT_FILE" || echo "TEMPLATE_NOT_FOUND"
+[ -f "$_TMPL" ] && cp "$_TMPL" "$_REPORT_FILE" && echo "TEMPLATE: $_REPORT_FILE" || echo "TEMPLATE_NOT_FOUND: $_TMPL"
 ```
 
 Record start time for duration tracking:
@@ -387,11 +386,77 @@ learnings" capture phase so future runs can script them faster.
 
 ---
 
+## AI slop scan (runs as step 3 of each page audit)
+
+**Initialization:** Load `{BASE_DIR}/references/ai-slop-patterns.md` as the `<ai-slop-checklist>`.
+
+**Execution Logic (FORCED ITERATION):**
+
+1.  **Checklist Mapping:** Identify every unique `pattern-id` within the `<ai-slop-checklist>`.
+2.  **Serial Verification:** You MUST evaluate the page against each pattern one-by-one. Do not summarize.
+3.  **Positive Match Protocol:** If a match is found:
+    - Tag as `slop:<pattern-id>`.
+    - Record immediately to the report as `FINDING-NNN`.
+4.  **Negative Match Protocol:** If a pattern is checked but not found, move to the next item in the list silently.
+5.  **Completion Guard:** Before exiting Step 3, perform a final sweep to ensure no pattern in the `.md` file was skipped.
+
+**Severity Assessment Matrix:**
+
+- **Default:** Medium.
+- **Critical (Force Escalation):** Transactional/High-Trust zones (Checkout, Legal, Security).
+- **Heuristic Overrides:**
+  - **High:** Obvious to a user within 5 seconds of landing.
+  - **Medium:** Erodes trust upon second visit/deep reading.
+  - **Low:** Technical/Design slop invisible to average users.
+
+**Scoring Algorithm:** `ai_slop_score` = 100 (Min: 0). Deduct for each `slop:*` finding:
+
+- **Critical:** −25 | **High:** −15 | **Medium:** −8 | **Low:** −3
+
+**Output Requirements:** For every confirmed finding, output:
+
+- `FINDING-NNN`
+- `pattern`: `slop:<pattern-id>`
+- `evidence`: [Quote offending string or describe visual artifact]
+- `severity`: [Final Level]
+- `justification`: [Why this severity?]
+
+**Continuity:** Only after every item in `<ai-slop-checklist>` has been verified, proceed to **Step 4 (Responsive Check)**.
+
+**Baseline Export (Phase 9):**
+
+```bash
+cat > "$OUTPUT_DIR/baseline.json" << EOF
+{
+  "date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "url": "<target>",
+  "designScore": N,
+  "aiSlopScore": N,
+  "findings": [
+    { "id": "FINDING-001", "severity": "...", "category": "...", "slop": "slop:<id> or null" }
+  ]
+}
+EOF
+```
+
+### Key "Forcing" Enhancements:
+
+1.  **Serial Verification:** By telling the agent it "MUST evaluate one-by-one" and "Do not summarize," you prevent it from
+    glancing at the page and giving a general "looks fine" response.
+2.  **Completion Guard:** This acts as a "sanity check" step where the agent is instructed to look back at the source
+    checklist before moving to Step 4.
+3.  **Negative Match Protocol:** This defines what to do when a pattern _isn't_ found, which keeps the agent's internal
+    "loop" focused and organized.
+4.  **Heuristic Clarity:** Moving the "5-second rule" directly into the Severity Assessment Matrix makes it a core part of
+    the logic rather than an external note.
+
+---
+
 ## Phase 9: Baseline design audit
 
-For each in-scope page, follow the checklist in `references/design-audit-checklist.md`. Browser tool names below are
-shorthand for the full `mcp__plugin_playwright_playwright__browser_*` names documented in Phase 6 — use the full names when
-calling.
+For each in-scope page, follow the checklist in `{BASE_DIR}/references/design-audit-checklist.md`. Browser tool names below
+are shorthand for the full `mcp__plugin_playwright_playwright__browser_*` names documented in Phase 6 — use the full names
+when calling.
 
 **Per-page steps:**
 
@@ -403,17 +468,6 @@ calling.
 3. **AI slop scan** — see the dedicated sub-section below before moving on to step 4.
 4. **Responsive check** — `browser_resize` to 375×812 (mobile) and 768×1024 (tablet), take a screenshot at each, compare
    hierarchy preservation against the 1280×720 first-impression screenshot.
-
-### AI slop scan (runs as step 3 of each page audit)
-
-Walk the checklist below and tag each confirmed match as `slop:<pattern-id>`. For extended rationale and typical fixes on any
-matched pattern, see `references/ai-slop-patterns.md`.
-
-Walk this checklist during the design audit phase. Each positive match is a finding tagged `slop:<pattern-id>` with default
-severity **Medium** unless context makes it worse (e.g. lorem ipsum in a production checkout flow is Critical, not Medium).
-
-Scoring: each confirmed pattern deducts from `ai_slop_score` using the standard scale — −25 Critical / −15 High / −8 Medium /
-−3 Low.
 
 ### Color & gradient smells
 
@@ -458,33 +512,6 @@ Scoring: each confirmed pattern deducts from `ai_slop_score` using the standard 
   effects where one would do.
 - **slop:transition-on-everything** — `transition: all 0.3s` applied globally, causing unwanted animation on color, width,
   padding changes that should be instant.
-
-### How to decide severity
-
-A pattern that a first-time visitor would notice within 5 seconds → High. A pattern that erodes trust on a second visit →
-Medium. A pattern that a designer would flag but most users wouldn't → Low.
-
-Refer to `references/ai-slop-patterns.md` in the calling skill for extended rationale on each pattern and typical fixes.
-
-**Continue to step 4 (responsive check) once the slop scan is complete.**
-
-**Write each finding to the report immediately** using the FINDING-NNN format from `references/design-report-template.md`.
-
-**Record baseline scores at the end of Phase 9:**
-
-```bash
-cat > "$OUTPUT_DIR/baseline.json" << EOF
-{
-  "date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "url": "<target>",
-  "designScore": N,
-  "aiSlopScore": N,
-  "findings": [
-    { "id": "FINDING-001", "severity": "...", "category": "...", "slop": "slop:gradient-purple-blue or null" }
-  ]
-}
-EOF
-```
 
 **Score formulas** — each starts at 100; minimum 0.
 
@@ -722,8 +749,8 @@ DURATION=$(( _END - _START ))
 ```
 
 Fill in the report at `$_REPORT_FILE` (the path captured in Phase 7 — do not recompute the date here; a run that spans
-midnight would otherwise write to a file that does not exist). Use the skeleton from `references/design-report-template.md`.
-Required sections:
+midnight would otherwise write to a file that does not exist). Use the skeleton from
+`{BASE_DIR}/references/design-report-template.md`. Required sections:
 
 - Metadata (date, URL, branch, commit, tier, scope, duration, page count, screenshot count, DESIGN.md status)
 - Design Score and AI Slop Score with baseline → final deltas
